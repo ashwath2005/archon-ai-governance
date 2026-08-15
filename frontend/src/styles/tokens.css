@@ -1,0 +1,118 @@
+/* ==========================================================================
+   ARCHON DESIGN SYSTEM TOKENS — AWARD-WINNING MOTION ENGINE
+   ========================================================================== */
+
+:root, [data-theme="dark"] {
+  /* PITCH BLACK OLED SURFACES */
+  --archon-bg: #000000;
+  --archon-surface: #050505;
+  --archon-surface-elevated: #080808;
+  --archon-surface-card: #0B0B0C;
+  --archon-surface-hover: #121214;
+
+  /* PRECISION HAIRLINE STRUCTURAL BORDERS */
+  --archon-border: #171719;
+  --archon-border-subtle: #1D1D20;
+  --archon-border-hover: #2B2B30;
+  --archon-border-focus: #38BDF8;
+
+  /* TEXT HIERARCHY */
+  --archon-text: #F5F5F5;
+  --archon-text-secondary: #A1A1A6;
+  --archon-text-muted: #66666C;
+  --archon-text-disabled: #44444A;
+
+  /* SEMANTIC ACCENT DISCIPLINE */
+  --archon-cyan: #38BDF8;
+  --archon-cyan-bg: rgba(56, 189, 248, 0.06);
+  --archon-cyan-border: rgba(56, 189, 248, 0.22);
+  --archon-cyan-glow: 0 0 20px rgba(56, 189, 248, 0.15);
+
+  --archon-indigo: #5542FF;
+  --archon-indigo-bg: rgba(85, 66, 255, 0.08);
+  --archon-indigo-border: rgba(85, 66, 255, 0.22);
+
+  --archon-success: #34D399;
+  --archon-success-bg: rgba(52, 211, 153, 0.06);
+  --archon-success-border: rgba(52, 211, 153, 0.22);
+
+  --archon-warning: #FBBF24;
+  --archon-warning-bg: rgba(251, 191, 36, 0.06);
+  --archon-warning-border: rgba(251, 191, 36, 0.22);
+
+  --archon-danger: #FB7185;
+  --archon-danger-bg: rgba(251, 113, 133, 0.06);
+  --archon-danger-border: rgba(251, 113, 133, 0.22);
+
+  /* ALIASES FOR COMPONENT INTEGRATION */
+  --background: var(--archon-bg);
+  --secondary: var(--archon-surface);
+  --card: var(--archon-surface-card);
+  --surface: var(--archon-surface);
+  --elevated: var(--archon-surface-elevated);
+  --border: var(--archon-border);
+  --border-color: var(--archon-border);
+
+  --bg-primary: var(--archon-bg);
+  --bg-secondary: var(--archon-surface);
+  --bg-card: var(--archon-surface-card);
+  --bg-surface: var(--archon-surface);
+  --bg-elevated: var(--archon-surface-elevated);
+  --bg-card-hover: var(--archon-surface-hover);
+
+  --text-primary: var(--archon-text);
+  --text-secondary: var(--archon-text-secondary);
+  --text-muted: var(--archon-text-muted);
+
+  --accent-cyan: var(--archon-cyan);
+  --accent-indigo: var(--archon-indigo);
+  --accent-primary: var(--archon-cyan);
+  --accent-primary-light: var(--archon-cyan);
+  --btn-primary-text: #000000;
+
+  --success: var(--archon-success);
+  --success-bg: var(--archon-success-bg);
+  --success-border: var(--archon-success-border);
+  --success-text: var(--archon-success);
+
+  --warning: var(--archon-warning);
+  --warning-bg: var(--archon-warning-bg);
+  --warning-border: var(--archon-warning-border);
+  --warning-text: var(--archon-warning);
+
+  --danger: var(--archon-danger);
+  --danger-bg: var(--archon-danger-bg);
+  --danger-border: var(--archon-danger-border);
+  --danger-text: var(--archon-danger);
+
+  --info: var(--archon-cyan);
+  --info-bg: var(--archon-cyan-bg);
+  --info-border: var(--archon-cyan-border);
+  --info-text: var(--archon-cyan);
+
+  /* RADIUS SCALE */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  /* SPACING SCALE */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* TYPOGRAPHY */
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-brand: 'Orbitron', 'Ethnocentric', sans-serif;
+
+  /* HIGH-FPS SPRING MOTION CURVES (FRAMER MOTION QUALITY) */
+  --spring-bounce: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-fast: 140ms cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-normal: 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-slow: 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}

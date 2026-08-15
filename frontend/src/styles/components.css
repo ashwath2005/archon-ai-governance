@@ -1,0 +1,306 @@
+/* ==========================================================================
+   ARCHON TECHNICAL COMPONENT STYLESHEET — AWARD-WINNING INTERACTION
+   ========================================================================== */
+
+/* Button Primitives with Spring Micro-Physics */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: 7px 14px;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: -0.01em;
+  border: 1px solid transparent;
+  cursor: pointer;
+  outline: none;
+  transition: all var(--spring-bounce) 0.18s;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--archon-cyan);
+  color: #000000;
+  font-weight: 700;
+  border: 1px solid var(--archon-cyan);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.2);
+}
+.btn-primary:hover {
+  background: #7dd3fc;
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 0 22px rgba(56, 189, 248, 0.35);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary {
+  background: var(--archon-surface);
+  border: 1px solid var(--archon-border);
+  color: var(--archon-text);
+}
+.btn-secondary:hover {
+  background: var(--archon-surface-hover);
+  border-color: var(--archon-border-hover);
+  color: #FFFFFF;
+  transform: translateY(-1px);
+}
+.btn-secondary:active {
+  transform: scale(0.98);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--archon-text-secondary);
+}
+.btn-ghost:hover {
+  background: var(--archon-surface);
+  color: var(--archon-text);
+}
+
+.btn-danger {
+  background: var(--archon-danger-bg);
+  border: 1px solid var(--archon-danger-border);
+  color: var(--archon-danger);
+}
+.btn-danger:hover {
+  background: rgba(251, 113, 133, 0.14);
+  border-color: var(--archon-danger);
+}
+
+.btn-success {
+  background: var(--archon-success-bg);
+  border: 1px solid var(--archon-success-border);
+  color: var(--archon-success);
+}
+.btn-success:hover {
+  background: rgba(52, 211, 153, 0.14);
+  border-color: var(--archon-success);
+}
+
+.btn-warning {
+  background: var(--archon-warning-bg);
+  border: 1px solid var(--archon-warning-border);
+  color: var(--archon-warning);
+}
+.btn-warning:hover {
+  background: rgba(251, 191, 36, 0.14);
+}
+
+.btn-sm {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm);
+}
+
+/* Hairline Top Gradient Border Accent Utility */
+.border-top-accent {
+  position: relative;
+}
+.border-top-accent::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(56, 189, 248, 0.4) 0%, rgba(85, 66, 255, 0.2) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+/* UNIQUE TECH CORNER BRACKET ACCENTS */
+.tech-bracket {
+  position: relative;
+}
+.tech-bracket::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid var(--archon-cyan);
+  border-left: 2px solid var(--archon-cyan);
+  pointer-events: none;
+}
+.tech-bracket::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
+  border-bottom: 2px solid var(--archon-cyan);
+  border-right: 2px solid var(--archon-cyan);
+  pointer-events: none;
+}
+
+/* UNIQUE CYBER SLANTED STATUS CAPSULES */
+.status-hex {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 10px;
+  clip-path: polygon(6px 0, 100% 0, calc(100% - 6px) 100%, 0 100%);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.status-approved {
+  background: var(--archon-success-bg);
+  color: var(--archon-success);
+  border: 1px solid var(--archon-success-border);
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.1);
+}
+.status-revision {
+  background: var(--archon-warning-bg);
+  color: var(--archon-warning);
+  border: 1px solid var(--archon-warning-border);
+  box-shadow: 0 0 10px rgba(251, 191, 36, 0.1);
+}
+.status-not-reviewed {
+  background: var(--archon-cyan-bg);
+  color: var(--archon-cyan);
+  border: 1px solid var(--archon-cyan-border);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.1);
+}
+
+/* Award-Winning Card System — Light Sweep Reflection & Hairline Borders */
+.card-container, .card, .card-award {
+  position: relative;
+  background: var(--archon-surface);
+  border: 1px solid var(--archon-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  overflow: hidden;
+  transition: border-color 0.22s var(--spring-bounce), transform 0.22s var(--spring-bounce);
+}
+
+.card-award::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.03) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+  pointer-events: none;
+}
+
+.card-container:hover, .card:hover, .card-award:hover {
+  border-color: var(--archon-border-hover);
+}
+
+.card-award:hover::after {
+  left: 150%;
+}
+
+.card-interactive {
+  cursor: pointer;
+}
+.card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: var(--archon-cyan-border);
+}
+
+/* Dense Technical Infrastructure Tables */
+.table-container {
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--archon-border);
+  background: var(--archon-bg);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.8rem;
+}
+th {
+  background: var(--archon-surface);
+  color: var(--archon-text-muted);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--archon-border);
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--archon-border);
+  color: var(--archon-text);
+  font-family: var(--font-sans);
+  transition: background var(--motion-fast);
+}
+tr:last-child td {
+  border-bottom: none;
+}
+tr:hover td {
+  background: var(--archon-surface-elevated);
+}
+
+/* Form Controls */
+input, select, textarea {
+  font-family: var(--font-sans);
+  background: var(--archon-surface);
+  color: var(--archon-text);
+  border: 1px solid var(--archon-border);
+  border-radius: var(--radius-md);
+  padding: 7px 11px;
+  font-size: 0.825rem;
+  outline: none;
+  transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
+}
+input::placeholder, textarea::placeholder {
+  color: var(--archon-text-muted);
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--archon-cyan);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+}
+
+/* Modals with Spring Physics */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: var(--archon-surface-elevated);
+  border: 1px solid var(--archon-border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  width: 100%;
+  max-width: 500px;
+  animation: modalSpring 0.28s var(--spring-bounce) both;
+}
+
+/* Animation Keyframes */
+@keyframes modalSpring {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes radarSweep {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
