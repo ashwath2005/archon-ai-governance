@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
 import { StatusBadge, ReasoningBadge } from '../components/common/Badge';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
+import { ErrorState } from '../components/common/ErrorState';
 import { DecisionSelector } from '../components/common/DecisionSelector';
 import { ApprovalDialog } from '../components/common/ApprovalDialog';
 import { RevisionDialog } from '../components/common/RevisionDialog';
@@ -11,7 +12,21 @@ import { ShortcutModal } from '../components/common/ShortcutModal';
 import { ReviewTimeline } from '../components/common/ReviewTimeline';
 import { ArchitectureGraph } from '../components/architecture/ArchitectureGraph';
 import { AIReviewPanel } from '../components/intelligence/AIReviewPanel';
-import { ExternalLink, CheckCircle2, AlertTriangle, ArrowLeft, Check, Download, Keyboard, XCircle } from 'lucide-react';
+import {
+  ExternalLink,
+  CheckCircle2,
+  AlertTriangle,
+  ArrowLeft,
+  Check,
+  Download,
+  Keyboard,
+  Save,
+  Clock,
+  Shield,
+  Layers,
+  Sparkles,
+  Info
+} from 'lucide-react';
 
 export const SubmissionDetailPage = () => {
   const { id } = useParams();
@@ -23,8 +38,9 @@ export const SubmissionDetailPage = () => {
   const [evaluations, setEvaluations] = useState({});
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [activeSectionCode, setActiveSectionCode] = useState('01');
+  const [activeSectionCode, setActiveSectionCode] = useState('0');
   const [reviewerNotes, setReviewerNotes] = useState('');
 
   // Dialog & Shortcut Modal States
@@ -32,77 +48,33 @@ export const SubmissionDetailPage = () => {
   const [revisionOpen, setRevisionOpen] = useState(false);
   const [shortcutOpen, setShortcutOpen] = useState(false);
 
-  useEffect(() => {
-    fetchDetailData();
-  }, [id]);
-
-  // Global Keyboard Shortcuts Listener (J/K, 1/2/3, ?)
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      // Don't intercept when user is typing in textarea or input
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
-
-      if (e.key === '?') {
-        e.preventDefault();
-        setShortcutOpen((prev) => !prev);
-      } else if (e.key.toLowerCase() === 'j') {
-        // Next Section
-        e.preventDefault();
-        setRubricSections((sections) => {
-          const idx = sections.findIndex((s) => s.code === activeSectionCode);
-          if (idx !== -1 && idx < sections.length - 1) {
-            setActiveSectionCode(sections[idx + 1].code);
-          }
-          return sections;
-        });
-      } else if (e.key.toLowerCase() === 'k') {
-        // Previous Section
-        e.preventDefault();
-        setRubricSections((sections) => {
-          const idx = sections.findIndex((s) => s.code === activeSectionCode);
-          if (idx > 0) {
-            setActiveSectionCode(sections[idx - 1].code);
-          }
-          return sections;
-        });
-      } else if (['1', '2', '3'].includes(e.key)) {
-        // Select Decision for first item in active section
-        const activeSec = rubricSections.find((s) => s.code === activeSectionCode);
-        if (activeSec?.items?.length > 0) {
-          const firstItemId = activeSec.items[0].id;
-          const optMap = { '1': 'YES', '2': 'NO', '3': 'DEFERRED' };
-          handleDecisionChange(firstItemId, optMap[e.key]);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeSectionCode, rubricSections]);
-
   const fetchDetailData = async () => {
     setLoading(true);
+    setError(false);
     try {
-      const [subRes, rubRes, evalRes, histRes] = await Promise.all([
+      const [subRes, rubRes, evalRes, histRes] = await Promise.allSettled([
         axiosClient.get(`/submissions/${id}`),
         axiosClient.get('/rubric'),
         axiosClient.get(`/submissions/${id}/evaluations`),
-        axiosClient.get(`/submissions/${id}/history`)
+        axiosClient.get(`/submissions/${id}/review-history`)
       ]);
 
-      if (subRes.success) {
-        setSubmission(subRes.data);
-        setReviewerNotes(subRes.data.reviewerNotes || '');
+      if (subRes.status === 'fulfilled' && subRes.value?.success) {
+        setSubmission(subRes.value.data);
+        setReviewerNotes(subRes.value.data.reviewerNotes || '');
+      } else {
+        setError(true);
       }
 
-      if (rubRes.success && rubRes.data?.length > 0) {
-        setRubricSections(rubRes.data || []);
-        setActiveSectionCode(rubRes.data[0].code);
+      if (rubRes.status === 'fulfilled' && rubRes.value?.success && rubRes.value.data?.length > 0) {
+        const sectionsData = rubRes.value.data || [];
+        setRubricSections(sectionsData);
+        setActiveSectionCode(String(sectionsData[0].sectionCode ?? sectionsData[0].code ?? '0'));
       }
 
-      if (evalRes.success) {
+      if (evalRes.status === 'fulfilled' && evalRes.value?.success) {
         const evalMap = {};
-        (evalRes.data || []).forEach((item) => {
+        (evalRes.value.data || []).forEach((item) => {
           evalMap[item.rubricItemId] = {
             id: item.id,
             decision: item.decision || '',
@@ -113,15 +85,53 @@ export const SubmissionDetailPage = () => {
         setEvaluations(evalMap);
       }
 
-      if (histRes.success) {
-        setHistory(histRes.data || []);
+      if (histRes.status === 'fulfilled' && histRes.value?.success) {
+        setHistory(histRes.value.data || []);
       }
     } catch (err) {
       console.error('Failed to load submission workspace', err);
+      setError(true);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchDetailData();
+  }, [id]);
+
+  // Global Keyboard Shortcuts (J/K, 1/2/3, ?)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+      if (e.key === '?') {
+        e.preventDefault();
+        setShortcutOpen((prev) => !prev);
+      } else if (e.key.toLowerCase() === 'j') {
+        e.preventDefault();
+        setRubricSections((sections) => {
+          const idx = sections.findIndex((s) => String(s.sectionCode ?? s.code) === String(activeSectionCode));
+          if (idx !== -1 && idx < sections.length - 1) {
+            setActiveSectionCode(String(sections[idx + 1].sectionCode ?? sections[idx + 1].code));
+          }
+          return sections;
+        });
+      } else if (e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setRubricSections((sections) => {
+          const idx = sections.findIndex((s) => String(s.sectionCode ?? s.code) === String(activeSectionCode));
+          if (idx > 0) {
+            setActiveSectionCode(String(sections[idx - 1].sectionCode ?? sections[idx - 1].code));
+          }
+          return sections;
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeSectionCode, rubricSections]);
 
   const handleDecisionChange = (rubricItemId, newDecision) => {
     setEvaluations((prev) => ({
@@ -147,7 +157,6 @@ export const SubmissionDetailPage = () => {
     setReviewerNotes((prev) => (prev ? `${prev}\n\n[AI Recommendation]: ${recommendationText}` : `[AI Recommendation]: ${recommendationText}`));
   };
 
-  // Enterprise Governance Record (AGR) Exporter
   const handleExportAGR = () => {
     if (!submission) return;
 
@@ -162,10 +171,10 @@ export const SubmissionDetailPage = () => {
     doc += `---\n\n## ARCHITECTURE DECISION RECORDS (ADR)\n\n`;
 
     rubricSections.forEach((sec) => {
-      doc += `### Section ${sec.code} · ${sec.title}\n\n`;
+      doc += `### Section ${sec.sectionCode ?? sec.code} · ${sec.sectionName ?? sec.title}\n\n`;
       sec.items?.forEach((item) => {
         const ev = evaluations[item.id] || {};
-        doc += `#### ${item.title}\n`;
+        doc += `#### ${item.itemName ?? item.title}\n`;
         doc += `- **Decision**: ${ev.decision || 'UNSET'}\n`;
         doc += `- **Reasoning Justification**: ${ev.reasoning || 'None provided'}\n\n`;
       });
@@ -173,7 +182,7 @@ export const SubmissionDetailPage = () => {
 
     doc += `---\n\n## AUDIT TIMELINE LOG\n\n`;
     history.forEach((h) => {
-      doc += `- **${h.timestamp}** | Action: \`${h.action}\` | Actor: ${h.actorName} | Notes: "${h.notes || ''}"\n`;
+      doc += `- **${h.createdAt || h.timestamp}** | Status: \`${h.previousStatus} -> ${h.newStatus}\` | Reviewer: ${h.reviewerName} | Comments: "${h.comments || ''}"\n`;
     });
 
     const blob = new Blob([doc], { type: 'text/markdown' });
@@ -191,12 +200,12 @@ export const SubmissionDetailPage = () => {
     try {
       const payload = Object.keys(evaluations).map((itemId) => ({
         rubricItemId: parseInt(itemId),
-        decision: evaluations[itemId].decision,
-        reasoning: evaluations[itemId].reasoning,
-        reviewerComment: evaluations[itemId].reviewerComment
+        decision: evaluations[itemId].decision || '',
+        reasoning: evaluations[itemId].reasoning || '',
+        reviewerComment: evaluations[itemId].reviewerComment || ''
       }));
 
-      await axiosClient.post(`/submissions/${id}/evaluations`, payload);
+      await axiosClient.post(`/submissions/${id}/evaluations`, { evaluations: payload });
       await fetchDetailData();
     } catch (err) {
       alert('Failed to save evaluations: ' + (err.response?.data?.message || err.message));
@@ -210,7 +219,7 @@ export const SubmissionDetailPage = () => {
     try {
       await saveEvaluations();
 
-      const res = await axiosClient.post(`/submissions/${id}/review`, {
+      const res = await axiosClient.put(`/submissions/${id}/review`, {
         status: newStatus,
         reviewerNotes: notesToSave
       });
@@ -227,8 +236,24 @@ export const SubmissionDetailPage = () => {
     }
   };
 
-  if (loading) return <LoadingSkeleton count={6} height="120px" />;
-  if (!submission) return <div style={{ color: 'var(--archon-text-muted)' }}>Submission not found.</div>;
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <LoadingSkeleton count={1} height="50px" />
+        <LoadingSkeleton count={3} height="160px" />
+      </div>
+    );
+  }
+
+  if (error || !submission) {
+    return (
+      <ErrorState
+        title="Submission Not Found"
+        message={`Could not load capstone submission details for ID #${id}.`}
+        onRetry={fetchDetailData}
+      />
+    );
+  }
 
   const canReview = isReviewer || isAdmin;
 
@@ -251,286 +276,301 @@ export const SubmissionDetailPage = () => {
   });
 
   const progressPercent = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+  const currentSection = rubricSections.find((sec) => String(sec.sectionCode ?? sec.code) === String(activeSectionCode)) || rubricSections[0];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-      {/* Workspace Header Navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button className="btn btn-secondary btn-sm" onClick={() => navigate('/submissions')}>
-            <ArrowLeft size={13} /> Back
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="page-transition">
+      
+      {/* 1. WORKSTATION HEADER */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <button className="btn btn-secondary btn-sm" onClick={() => navigate('/submissions')} style={{ borderRadius: '8px' }}>
+            <ArrowLeft size={14} /> Back
           </button>
           <div>
-            <h1 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--archon-text)', marginBottom: '2px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--archon-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                ARCH-{String(submission.id).padStart(3, '0')}
+              </span>
+              <StatusBadge status={submission.status} />
+              <ReasoningBadge included={submission.reasoningIncluded} />
+            </div>
+            <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--archon-text)', margin: 0, letterSpacing: '-0.02em' }}>
               {submission.projectTitle}
             </h1>
-            <div style={{ fontSize: '0.775rem', color: 'var(--archon-text-muted)' }}>
-              ID: <span className="mono" style={{ color: 'var(--archon-cyan)' }}>ARCH-{String(submission.id).padStart(3, '0')}</span> • Author: <strong style={{ color: 'var(--archon-text)' }}>{submission.internName}</strong> • Domain: <span className="mono">{submission.projectDomain}</span>
+            <div style={{ fontSize: '0.78rem', color: 'var(--archon-text-secondary)', marginTop: '2px' }}>
+              Intern: <strong style={{ color: 'var(--archon-text)' }}>{submission.internName}</strong> • Domain: <span className="badge-premium badge-gray" style={{ fontSize: '0.68rem', padding: '1px 6px' }}>{submission.projectDomain}</span> • Submitted: {submission.dateSubmitted}
             </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <button className="btn btn-secondary btn-sm" onClick={() => setShortcutOpen(true)} title="Keyboard Shortcuts Cheatsheet">
-            <Keyboard size={12} /> Hotkeys (?)
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary btn-sm" onClick={() => setShortcutOpen(true)} style={{ borderRadius: '6px' }} title="Keyboard Hotkeys">
+            <Keyboard size={13} /> Hotkeys (?)
           </button>
-          <button className="btn btn-secondary btn-sm" onClick={handleExportAGR}>
-            <Download size={12} /> Export AGR Report
+          <button className="btn btn-secondary btn-sm" onClick={handleExportAGR} style={{ borderRadius: '6px' }}>
+            <Download size={13} /> Export AGR
           </button>
-          <a href={submission.githubUrl} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm">
-            GitHub Repo <ExternalLink size={11} />
-          </a>
-          <a href={submission.onePagerUrl} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm">
-            Mapping Doc <ExternalLink size={11} />
-          </a>
+          {submission.githubUrl && (
+            <a href={submission.githubUrl} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm" style={{ borderRadius: '6px' }}>
+              GitHub Repo <ExternalLink size={12} />
+            </a>
+          )}
+          {submission.onePagerUrl && (
+            <a href={submission.onePagerUrl} target="_blank" rel="noreferrer" className="btn btn-secondary btn-sm" style={{ borderRadius: '6px' }}>
+              Mapping Doc <ExternalLink size={12} />
+            </a>
+          )}
         </div>
       </div>
 
-      {/* 3-COLUMN ARCHITECTURE REVIEW WORKSPACE */}
-      <div style={{ display: 'grid', gridTemplateColumns: '230px 1fr 310px', gap: '16px', alignItems: 'start' }}>
+      {/* 2. 3-COLUMN WORKSPACE CANVAS */}
+      <div style={{ display: 'grid', gridTemplateColumns: '240px 1fr 310px', gap: '16px', alignItems: 'start' }}>
         
-        {/* COLUMN 1: Sticky Rubric Section Navigation */}
+        {/* COLUMN 1: Sticky Rubric Sections Navigator */}
         <div
+          className="premium-card"
           style={{
             position: 'sticky',
             top: '70px',
-            background: 'var(--archon-surface)',
-            border: '1px solid var(--archon-border)',
-            borderRadius: 'var(--radius-lg)',
-            padding: '14px 10px'
+            padding: '12px 8px'
           }}
         >
-          <div className="mono" style={{ fontSize: '0.625rem', fontWeight: 700, color: 'var(--archon-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px', paddingLeft: '6px' }}>
-            ARCHITECTURE RUBRIC
+          <div style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--archon-text-muted)', textTransform: 'uppercase', padding: '4px 10px', marginBottom: '6px', letterSpacing: '0.04em' }}>
+            Rubric Domains
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             {rubricSections.map((sec) => {
-              const isActive = activeSectionCode === sec.code;
+              const code = String(sec.sectionCode ?? sec.code);
+              const isActive = activeSectionCode === code;
               const secItems = sec.items || [];
               const completedCount = secItems.filter((item) => evaluations[item.id]?.decision).length;
-              const isSecComplete = secItems.length > 0 && completedCount === secItems.length;
+              const isComplete = secItems.length > 0 && completedCount === secItems.length;
 
               return (
                 <button
-                  key={sec.code}
-                  onClick={() => setActiveSectionCode(sec.code)}
+                  key={code}
+                  onClick={() => setActiveSectionCode(code)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    padding: '8px 8px',
-                    borderRadius: 'var(--radius-md)',
-                    fontSize: '0.775rem',
-                    fontWeight: isActive ? 700 : 500,
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    fontSize: '0.78rem',
+                    fontWeight: isActive ? 600 : 400,
                     textAlign: 'left',
-                    borderLeft: isActive ? '3px solid var(--archon-cyan)' : '3px solid transparent',
-                    background: isActive ? 'var(--archon-surface-elevated)' : 'transparent',
-                    color: isActive ? 'var(--archon-text)' : 'var(--archon-text-secondary)',
-                    transition: 'all var(--motion-fast)'
+                    background: isActive ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+                    color: isActive ? '#FFFFFF' : 'var(--archon-text-secondary)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
                   }}
                 >
-                  <span className="truncate">{sec.code} · {sec.title}</span>
-                  <span className="mono" style={{ fontSize: '0.65rem', color: isSecComplete ? 'var(--archon-success)' : 'var(--archon-text-muted)' }}>
-                    {isSecComplete ? <Check size={12} /> : `${completedCount}/${secItems.length}`}
+                  <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    0{code}. {sec.sectionName ?? sec.title}
+                  </span>
+                  <span style={{ fontSize: '0.68rem', color: isComplete ? 'var(--archon-success)' : 'var(--archon-text-muted)', marginLeft: '6px', flexShrink: 0 }}>
+                    {isComplete ? <Check size={12} /> : `${completedCount}/${secItems.length}`}
                   </span>
                 </button>
               );
             })}
           </div>
 
-          {/* Review Completion Progress Bar */}
-          <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--archon-border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--archon-text-muted)', marginBottom: '4px' }}>
-              <span>Completion Progress</span>
-              <span className="mono" style={{ color: 'var(--archon-cyan)' }}>{progressPercent}%</span>
+          {/* Progress Bar */}
+          <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.06)', paddingLeft: '6px', paddingRight: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--archon-text-muted)', marginBottom: '4px' }}>
+              <span>Evaluation Progress</span>
+              <span style={{ color: 'var(--archon-cyan)', fontWeight: 600 }}>{progressPercent}%</span>
             </div>
-            <div style={{ height: '4px', width: '100%', background: 'var(--archon-bg)', borderRadius: '2px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${progressPercent}%`, background: 'var(--archon-cyan)', transition: 'width var(--motion-normal)' }} />
+            <div style={{ height: '4px', width: '100%', background: 'rgba(255, 255, 255, 0.06)', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${progressPercent}%`, background: 'var(--archon-cyan)', transition: 'width 0.2s ease' }} />
             </div>
           </div>
         </div>
 
-        {/* COLUMN 2: Architecture Decision Review Workspace */}
+        {/* COLUMN 2: Center Evaluation Canvas */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
-          {/* Context-Aware Interactive Architecture Node Graph */}
+          {/* Architecture Pipeline Graph */}
           <ArchitectureGraph activeSectionCode={activeSectionCode} projectDomain={submission.projectDomain} />
 
-          {/* Criteria Evaluation ADR Cards */}
-          {rubricSections
-            .filter((sec) => sec.code === activeSectionCode)
-            .map((sec) => (
-              <div key={sec.code} style={{ background: 'var(--archon-surface)', border: '1px solid var(--archon-border)', borderRadius: 'var(--radius-lg)', padding: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <h2 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--archon-text)' }}>
-                    Section {sec.code} · {sec.title}
-                  </h2>
-                  <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-text-muted)' }}>
-                    {sec.items?.length || 0} CRITERIA ITEMS
-                  </span>
-                </div>
-                <p style={{ color: 'var(--archon-text-muted)', fontSize: '0.8rem', marginBottom: '20px' }}>
-                  {sec.description}
-                </p>
-
-                {/* Criteria List */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                  {sec.items?.map((item) => {
-                    const evalData = evaluations[item.id] || { decision: '', reasoning: '', reviewerComment: '' };
-                    const allowedOptions = item.allowedOptions ? item.allowedOptions.split(',').map((s) => s.trim()) : ['YES', 'NO', 'DEFERRED'];
-                    
-                    const charCount = evalData.reasoning?.trim().length || 0;
-                    const isReasoningValid = charCount > 5;
-                    const isReasoningEmpty = charCount === 0;
-
-                    return (
-                      <div
-                        key={item.id}
-                        style={{
-                          background: 'var(--archon-bg)',
-                          padding: '16px',
-                          borderRadius: 'var(--radius-md)',
-                          border: '1px solid var(--archon-border)'
-                        }}
-                      >
-                        <div style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--archon-text)', marginBottom: '4px' }}>
-                          {item.title}
-                        </div>
-                        <p style={{ fontSize: '0.775rem', color: 'var(--archon-text-secondary)', marginBottom: '12px' }}>
-                          {item.description}
-                        </p>
-
-                        {/* Decision Selector */}
-                        <div style={{ marginBottom: '12px' }}>
-                          <label className="mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-                            DECISION SELECTOR
-                          </label>
-                          <DecisionSelector
-                            options={allowedOptions}
-                            value={evalData.decision}
-                            onChange={(val) => handleDecisionChange(item.id, val)}
-                            disabled={!canReview}
-                          />
-                        </div>
-
-                        {/* Architectural Reasoning Area */}
-                        <div style={{ marginBottom: '8px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                            <label className="mono" style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--archon-text-muted)', textTransform: 'uppercase' }}>
-                              ARCHITECTURAL REASONING (COMPULSORY)
-                            </label>
-                            <span className="mono" style={{ fontSize: '0.65rem', color: isReasoningValid ? 'var(--archon-success)' : 'var(--archon-text-muted)' }}>
-                              {charCount} / 5000 chars
-                            </span>
-                          </div>
-
-                          <textarea
-                            rows={3}
-                            disabled={!canReview}
-                            value={evalData.reasoning}
-                            onChange={(e) => handleReasoningChange(item.id, e.target.value)}
-                            placeholder="State technical justification (e.g. data shape, latency SLA, memory footprint)..."
-                            style={{ width: '100%' }}
-                          />
-                        </div>
-
-                        {/* Live Reasoning Validation Callout */}
-                        <div className="mono" style={{ fontSize: '0.7rem' }}>
-                          {isReasoningValid && (
-                            <span style={{ color: 'var(--archon-success)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <CheckCircle2 size={12} /> ✓ REASONING VALID
-                            </span>
-                          )}
-                          {!isReasoningValid && !isReasoningEmpty && (
-                            <span style={{ color: 'var(--archon-warning)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <AlertTriangle size={12} /> REASONING TOO SHORT (MIN 5 CHARS)
-                            </span>
-                          )}
-                          {isReasoningEmpty && (
-                            <span style={{ color: 'var(--archon-danger)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              <XCircle size={12} /> ⚠ ARCHITECTURAL REASONING REQUIRED
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+          {/* Active Section ADR Criteria */}
+          {currentSection && (
+            <div className="premium-card" style={{ padding: '22px' }}>
+              
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--archon-text)', margin: 0 }}>
+                  0{currentSection.sectionCode ?? currentSection.code}. {currentSection.sectionName ?? currentSection.title}
+                </h2>
+                <span style={{ fontSize: '0.72rem', color: 'var(--archon-text-muted)' }}>
+                  {currentSection.items?.length || 0} Criteria Items
+                </span>
               </div>
-            ))}
+              
+              {currentSection.description && (
+                <p style={{ color: 'var(--archon-text-secondary)', fontSize: '0.82rem', marginBottom: '20px', lineHeight: 1.45 }}>
+                  {currentSection.description}
+                </p>
+              )}
+
+              {/* Criteria List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {currentSection.items?.map((item) => {
+                  const evalData = evaluations[item.id] || { decision: '', reasoning: '', reviewerComment: '' };
+                  
+                  let allowedOptions = ['YES', 'NO', 'DEFERRED'];
+                  if (Array.isArray(item.options)) {
+                    allowedOptions = item.options;
+                  } else if (typeof item.options === 'string') {
+                    try {
+                      allowedOptions = JSON.parse(item.options);
+                    } catch (e) {
+                      allowedOptions = item.options.split(',').map((s) => s.trim());
+                    }
+                  } else if (item.allowedOptions) {
+                    allowedOptions = item.allowedOptions.split(',').map((s) => s.trim());
+                  }
+
+                  const charCount = evalData.reasoning?.trim().length || 0;
+                  const isReasoningValid = charCount > 5;
+
+                  return (
+                    <div
+                      key={item.id}
+                      style={{
+                        padding: '16px',
+                        background: '#0c0c0e',
+                        border: '1px solid rgba(255, 255, 255, 0.06)',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '10px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+                        <span style={{ fontWeight: 600, fontSize: '0.88rem', color: 'var(--archon-text)' }}>
+                          {item.itemName ?? item.title}
+                        </span>
+                        <span style={{ fontSize: '0.68rem', color: 'var(--archon-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                          {item.itemKey ?? item.key}
+                        </span>
+                      </div>
+
+                      {item.description && (
+                        <div style={{ fontSize: '0.78rem', color: 'var(--archon-text-secondary)', lineHeight: 1.4 }}>
+                          {item.description}
+                        </div>
+                      )}
+
+                      {/* Decision Selector */}
+                      <DecisionSelector
+                        options={allowedOptions}
+                        value={evalData.decision}
+                        onChange={(opt) => handleDecisionChange(item.id, opt)}
+                        disabled={!canReview}
+                      />
+
+                      {/* Reasoning Textarea */}
+                      <div>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: 'var(--archon-text-muted)', marginBottom: '4px' }}>
+                          <span>Architectural Reasoning Justification</span>
+                          <span style={{ color: isReasoningValid ? 'var(--archon-success)' : charCount > 0 ? 'var(--archon-warning)' : 'var(--archon-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                            {charCount} / 5+ chars {isReasoningValid && '✓ Valid'}
+                          </span>
+                        </div>
+                        <textarea
+                          rows={2}
+                          value={evalData.reasoning}
+                          onChange={(e) => handleReasoningChange(item.id, e.target.value)}
+                          placeholder="Provide architectural trade-off justification for this decision (compulsory for approval)..."
+                          disabled={!canReview}
+                          style={{
+                            width: '100%',
+                            fontSize: '0.8rem',
+                            background: '#070709',
+                            border: `1px solid ${isReasoningValid ? 'rgba(52, 211, 153, 0.3)' : charCount > 0 ? 'rgba(251, 191, 36, 0.3)' : 'rgba(255, 255, 255, 0.08)'}`,
+                            borderRadius: '6px',
+                            padding: '8px 10px',
+                            color: 'var(--archon-text)'
+                          }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Save Evaluations CTA */}
+              {canReview && (
+                <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+                  <button
+                    onClick={saveEvaluations}
+                    disabled={submitting}
+                    className="btn btn-primary"
+                    style={{ padding: '8px 18px', borderRadius: '8px', fontSize: '0.82rem' }}
+                  >
+                    <Save size={14} /> {submitting ? 'Saving...' : 'Save Evaluations'}
+                  </button>
+                </div>
+              )}
+
+            </div>
+          )}
+
         </div>
 
-        {/* COLUMN 3: Sticky Governance Control Panel */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', position: 'sticky', top: '70px' }}>
+        {/* COLUMN 3: Right Governance & Review Controls */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
-          {/* Status & Review Controls */}
-          <div style={{ background: 'var(--archon-surface)', border: '1px solid var(--archon-border)', borderRadius: 'var(--radius-lg)', padding: '16px' }}>
-            <div className="mono" style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--archon-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>
-              GOVERNANCE CONTROL
+          {/* Status & Action Card */}
+          <div className="premium-card" style={{ padding: '18px' }}>
+            <div style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--archon-text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+              Governance Status
             </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-              <span style={{ fontSize: '0.775rem', color: 'var(--archon-text-muted)' }}>Status:</span>
-              <StatusBadge status={submission.status} />
-            </div>
-
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-              <span style={{ fontSize: '0.775rem', color: 'var(--archon-text-muted)' }}>Reasoning:</span>
-              <span className="mono" style={{ fontSize: '0.75rem', color: validReasoningCount === totalItems ? 'var(--archon-success)' : 'var(--archon-warning)' }}>
-                {validReasoningCount} / {totalItems} VALID
+              <StatusBadge status={submission.status} />
+              <span style={{ fontSize: '0.75rem', color: 'var(--archon-text-secondary)', fontFamily: 'var(--font-mono)' }}>
+                {validReasoningCount}/{totalItems} Valid
               </span>
             </div>
 
             {canReview && (
-              <>
-                <div style={{ marginBottom: '12px' }}>
-                  <label className="mono" style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-                    REVIEWER OVERALL NOTES
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={reviewerNotes}
-                    onChange={(e) => setReviewerNotes(e.target.value)}
-                    placeholder="General feedback for intern..."
-                    style={{ width: '100%' }}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <button
-                    className="btn btn-warning"
-                    disabled={submitting}
-                    onClick={() => setRevisionOpen(true)}
-                    style={{ width: '100%', fontSize: '0.775rem' }}
-                  >
-                    <AlertTriangle size={13} /> Request Revision
-                  </button>
-
-                  <button
-                    className="btn btn-success"
-                    disabled={submitting}
-                    onClick={() => setApprovalOpen(true)}
-                    style={{ width: '100%', fontSize: '0.775rem' }}
-                  >
-                    <CheckCircle2 size={13} /> Approve Submission
-                  </button>
-                </div>
-              </>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <button
+                  onClick={() => setApprovalOpen(true)}
+                  disabled={submitting}
+                  className="btn btn-success"
+                  style={{ width: '100%', padding: '9px', borderRadius: '6px', fontWeight: 600, fontSize: '0.8rem' }}
+                >
+                  <CheckCircle2 size={14} /> Approve Submission
+                </button>
+                <button
+                  onClick={() => setRevisionOpen(true)}
+                  disabled={submitting}
+                  className="btn btn-warning"
+                  style={{ width: '100%', padding: '9px', borderRadius: '6px', fontWeight: 600, fontSize: '0.8rem' }}
+                >
+                  <AlertTriangle size={14} /> Request Revision
+                </button>
+              </div>
             )}
           </div>
 
-          {/* Contextual Criterion-Linked AI Review Assistant */}
+          {/* AI Review Copilot Panel */}
           <AIReviewPanel
             activeSectionCode={activeSectionCode}
-            reasoningIncluded={submission.reasoningIncluded}
+            evaluations={evaluations}
             onAppendNote={handleAppendAINote}
           />
 
-          {/* Audit History Timeline */}
-          <div style={{ background: 'var(--archon-surface)', border: '1px solid var(--archon-border)', borderRadius: 'var(--radius-lg)', padding: '16px' }}>
-            <div className="mono" style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--archon-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>
-              AUDIT TIMELINE
+          {/* Review History Audit Timeline */}
+          <div className="premium-card" style={{ padding: '18px' }}>
+            <div style={{ fontSize: '0.72rem', fontWeight: 600, color: 'var(--archon-text)', marginBottom: '12px' }}>
+              Audit History Timeline
             </div>
             <ReviewTimeline history={history} />
           </div>
@@ -539,13 +579,16 @@ export const SubmissionDetailPage = () => {
 
       </div>
 
-      {/* Confirmation & Shortcut Modals */}
+      {/* Confirmation Modals */}
       <ApprovalDialog
         isOpen={approvalOpen}
         onClose={() => setApprovalOpen(false)}
-        onConfirm={() => handleStatusTransition('APPROVED', reviewerNotes)}
+        onConfirm={(notes) => handleStatusTransition('APPROVED', notes)}
         submitting={submitting}
-        reasoningIncluded={submission.reasoningIncluded}
+        submission={submission}
+        reviewerNotes={reviewerNotes}
+        validReasoningCount={validReasoningCount}
+        totalCriteriaCount={totalItems}
       />
 
       <RevisionDialog
@@ -553,14 +596,14 @@ export const SubmissionDetailPage = () => {
         onClose={() => setRevisionOpen(false)}
         onConfirm={(notes) => handleStatusTransition('NEEDS_REVISION', notes)}
         submitting={submitting}
+        submission={submission}
         reviewerNotes={reviewerNotes}
-        setReviewerNotes={setReviewerNotes}
+        rubricSections={rubricSections}
+        evaluations={evaluations}
       />
 
-      <ShortcutModal
-        isOpen={shortcutOpen}
-        onClose={() => setShortcutOpen(false)}
-      />
+      <ShortcutModal isOpen={shortcutOpen} onClose={() => setShortcutOpen(false)} />
+
     </div>
   );
 };
