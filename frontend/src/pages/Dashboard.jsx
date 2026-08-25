@@ -5,23 +5,19 @@ import { StatusBadge, ReasoningBadge } from '../components/common/Badge';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
 import { ErrorState } from '../components/common/ErrorState';
 import {
-  FileText,
+  Layers,
   Clock,
   AlertTriangle,
   CheckCircle2,
   ArrowRight,
   Shield,
-  ShieldCheck,
-  Sparkles,
-  Layers,
   Search,
-  Activity,
-  Cpu,
+  BookOpen,
   CheckSquare,
   XCircle,
-  HelpCircle,
   TrendingUp,
-  Award
+  SlidersHorizontal,
+  ChevronRight
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -72,10 +68,9 @@ export const Dashboard = () => {
   if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <LoadingSkeleton count={1} height="50px" />
-        <LoadingSkeleton count={4} height="110px" />
-        <LoadingSkeleton count={2} height="240px" />
-        <LoadingSkeleton count={1} height="300px" />
+        <LoadingSkeleton count={1} height="60px" />
+        <LoadingSkeleton count={4} height="120px" />
+        <LoadingSkeleton count={2} height="280px" />
       </div>
     );
   }
@@ -83,8 +78,8 @@ export const Dashboard = () => {
   if (error) {
     return (
       <ErrorState
-        title="Dashboard Connection Error"
-        message="Could not load real-time telemetry and summary metrics from the server."
+        title="Unable to Load Dashboard"
+        message="Could not connect to the ARCHON governance service."
         onRetry={fetchSummary}
       />
     );
@@ -94,6 +89,7 @@ export const Dashboard = () => {
   const needsRevisionCount = summary?.needsRevision || 0;
   const approvedCount = summary?.approved || 0;
   const totalCount = summary?.totalSubmissions || 0;
+  const reasoningRate = summary?.reasoningRate || 0;
 
   const statusPieData = [
     { name: 'Approved', value: approvedCount, color: '#34D399' },
@@ -102,384 +98,321 @@ export const Dashboard = () => {
   ].filter((d) => d.value > 0);
 
   const domainScores = [
-    { code: '01', name: 'RAG Architecture', score: 94, color: 'var(--archon-cyan)' },
-    { code: '02', name: 'Agentic Workflows', score: 91, color: 'var(--archon-indigo)' },
-    { code: '03', name: 'Model Trade-Offs', score: 89, color: 'var(--archon-cyan)' },
-    { code: '04', name: 'Distillation', score: 92, color: 'var(--archon-indigo)' },
-    { code: '05', name: 'LLMOps & Evals', score: 88, color: 'var(--archon-warning)' },
-    { code: '06', name: 'Safety & Governance', score: 96, color: 'var(--archon-success)' }
+    { code: '01', name: 'RAG Architecture', score: 94 },
+    { code: '02', name: 'Agentic Workflows', score: 91 },
+    { code: '03', name: 'Model Trade-Offs', score: 89 },
+    { code: '04', name: 'Distillation', score: 92 },
+    { code: '05', name: 'LLMOps & Evals', score: 88 },
+    { code: '06', name: 'Safety & Governance', score: 96 }
   ];
 
   const govScore = 91.4;
-  const radius = 38;
+  const radius = 34;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (govScore / 100) * circumference;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }} className="page-transition">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }} className="page-transition">
       
-      {/* 1. TOP TELEMETRY HUD BANNER */}
-      <div className="hud-banner">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div className="pulse-dot pulse-dot-emerald" />
-          <span className="mono" style={{ fontSize: '0.68rem', color: 'var(--archon-text)', fontWeight: 700, letterSpacing: '0.04em' }}>
-            ARCHON KERNEL v2.4
-          </span>
-        </div>
-        <div style={{ width: '1px', height: '14px', background: 'var(--archon-border)' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Shield size={12} style={{ color: 'var(--archon-cyan)' }} />
-          <span className="mono" style={{ fontSize: '0.68rem', color: 'var(--archon-text-secondary)' }}>
-            REASONING ENFORCEMENT: <strong style={{ color: 'var(--archon-cyan)' }}>ACTIVE (5+ Chars)</strong>
-          </span>
-        </div>
-        <div style={{ width: '1px', height: '14px', background: 'var(--archon-border)' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Activity size={12} style={{ color: 'var(--archon-success)' }} />
-          <span className="mono" style={{ fontSize: '0.68rem', color: 'var(--archon-text-secondary)' }}>
-            EVALUATION DOMAINS: <strong style={{ color: 'var(--archon-success)' }}>6 / 6 OPERATIONAL</strong>
-          </span>
-        </div>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span className="tag-pill" style={{ color: 'var(--archon-cyan)', borderColor: 'var(--archon-cyan-border)', background: 'var(--archon-cyan-bg)' }}>
-            <Cpu size={10} /> 99.98% AUDIT COMPLIANCE
-          </span>
-        </div>
-      </div>
-
-      {/* 2. COMMAND CENTER HERO HEADER */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+      {/* 1. CLEAN PREMIUM HEADER */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <h1 style={{ fontSize: '1.65rem', fontWeight: 800, color: 'var(--archon-text)', letterSpacing: '-0.02em', margin: 0 }}>
-              Capstone Review Command Center
-            </h1>
-            <span className="status-hex status-approved" style={{ fontSize: '0.6rem' }}>
-              ● LIVE DEPLOYMENT
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+            <span className="badge-premium badge-emerald">
+              <span className="badge-dot" /> Live System
             </span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--archon-text-muted)' }}>• ARCHON OS v2.4</span>
           </div>
-          <p style={{ color: 'var(--archon-text-secondary)', fontSize: '0.84rem', marginTop: '4px' }}>
-            Multi-domain architecture review workstation, compulsory ADR reasoning validation & governance auditing
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--archon-text)', letterSpacing: '-0.02em', margin: 0 }}>
+            Command Center
+          </h1>
+          <p style={{ color: 'var(--archon-text-secondary)', fontSize: '0.85rem', marginTop: '2px' }}>
+            Executive architecture governance, compulsory reasoning compliance & review tracking
           </p>
         </div>
 
         {/* Header Action Buttons */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Link to="/rubric" className="btn btn-secondary btn-sm">
-            <HelpCircle size={13} /> Rubric Standard
+          <Link to="/rubric" className="btn btn-secondary btn-sm" style={{ padding: '8px 14px', borderRadius: '8px' }}>
+            <BookOpen size={14} /> Rubric Standard
           </Link>
           <button
             onClick={() => navigate('/submissions')}
             className="btn btn-primary"
-            style={{ padding: '8px 16px', fontSize: '0.82rem', gap: '8px' }}
+            style={{ padding: '8px 16px', borderRadius: '8px', fontSize: '0.82rem', gap: '8px' }}
           >
-            <Layers size={14} /> Open Submissions Queue ({totalCount}) <ArrowRight size={14} />
+            Submissions Queue ({totalCount}) <ArrowRight size={14} />
           </button>
         </div>
       </div>
 
-      {/* 3. EXECUTIVE KPI HUD MATRIX (4 HIGH-TECH CARDS) */}
+      {/* 2. REFINED 4 KPI METRIC CARDS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
         
-        {/* Total Architectures */}
-        <div className="kpi-card tech-bracket" style={{ '--kpi-accent': 'var(--archon-cyan)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-text-muted)', fontWeight: 700, letterSpacing: '0.06em' }}>
-              TOTAL ARCHITECTURES
+        {/* Card 1: Total Architectures */}
+        <div className="premium-card">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--archon-text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Total Architectures
             </span>
-            <div style={{ background: 'var(--archon-cyan-bg)', color: 'var(--archon-cyan)', padding: '6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--archon-cyan-border)' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.05)', color: 'var(--archon-text-secondary)', padding: '6px', borderRadius: '6px' }}>
               <Layers size={15} />
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-            <span className="mono" style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--archon-text)' }}>
-              {totalCount}
-            </span>
-            <span className="tag-pill" style={{ color: 'var(--archon-cyan)' }}>Active In-Flight</span>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--archon-text)', lineHeight: 1.1 }}>
+            {totalCount}
           </div>
-          <div style={{ marginTop: '8px', fontSize: '0.72rem', color: 'var(--archon-text-muted)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span>Registry capacity</span>
-            <div style={{ flex: 1, height: '3px', background: 'var(--archon-border)', borderRadius: '2px', overflow: 'hidden' }}>
-              <div style={{ width: '100%', height: '100%', background: 'var(--archon-cyan)' }} />
-            </div>
+          <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--archon-text-secondary)' }}>
+            All active submissions in registry
           </div>
         </div>
 
-        {/* Not Reviewed */}
-        <div className="kpi-card tech-bracket" style={{ '--kpi-accent': 'var(--archon-cyan)', cursor: 'pointer' }} onClick={() => navigate('/submissions?status=NOT_REVIEWED')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-cyan)', fontWeight: 700, letterSpacing: '0.06em' }}>
-              AWAITING EVALUATION
+        {/* Card 2: Not Reviewed */}
+        <div
+          className="premium-card"
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate('/submissions?status=NOT_REVIEWED')}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--archon-cyan)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Awaiting Review
             </span>
-            <div style={{ background: 'var(--archon-cyan-bg)', color: 'var(--archon-cyan)', padding: '6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--archon-cyan-border)' }}>
+            <div style={{ background: 'rgba(56, 189, 248, 0.1)', color: 'var(--archon-cyan)', padding: '6px', borderRadius: '6px' }}>
               <Clock size={15} />
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-            <span className="mono" style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--archon-cyan)' }}>
-              {notReviewedCount}
-            </span>
-            <span className="tag-pill" style={{ color: 'var(--archon-text-secondary)' }}>
-              {notReviewedCount === 0 ? 'Queue Clear' : 'Pending Review'}
-            </span>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--archon-cyan)', lineHeight: 1.1 }}>
+            {notReviewedCount}
           </div>
-          <div style={{ marginTop: '8px', fontSize: '0.72rem', color: 'var(--archon-text-muted)' }}>
-            Awaiting reviewer rubric evaluation
+          <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--archon-text-secondary)' }}>
+            {notReviewedCount === 0 ? 'Queue is clear' : 'Pending reviewer evaluation'}
           </div>
         </div>
 
-        {/* Needs Revision */}
-        <div className="kpi-card tech-bracket" style={{ '--kpi-accent': 'var(--archon-warning)', cursor: 'pointer' }} onClick={() => navigate('/submissions?status=NEEDS_REVISION')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-warning)', fontWeight: 700, letterSpacing: '0.06em' }}>
-              NEEDS REVISION
+        {/* Card 3: Needs Revision */}
+        <div
+          className="premium-card"
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate('/submissions?status=NEEDS_REVISION')}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--archon-warning)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Needs Revision
             </span>
-            <div style={{ background: 'var(--archon-warning-bg)', color: 'var(--archon-warning)', padding: '6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--archon-warning-border)' }}>
+            <div style={{ background: 'rgba(251, 191, 36, 0.1)', color: 'var(--archon-warning)', padding: '6px', borderRadius: '6px' }}>
               <AlertTriangle size={15} />
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-            <span className="mono" style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--archon-warning)' }}>
-              {needsRevisionCount}
-            </span>
-            <span className="tag-pill" style={{ color: 'var(--archon-warning)', borderColor: 'var(--archon-warning-border)' }}>
-              Action Required
-            </span>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--archon-warning)', lineHeight: 1.1 }}>
+            {needsRevisionCount}
           </div>
-          <div style={{ marginTop: '8px', fontSize: '0.72rem', color: 'var(--archon-text-muted)' }}>
-            Missing reasoning or revision flagged
+          <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--archon-text-secondary)' }}>
+            Missing reasoning or review edits
           </div>
         </div>
 
-        {/* Approved */}
-        <div className="kpi-card tech-bracket" style={{ '--kpi-accent': 'var(--archon-success)', cursor: 'pointer' }} onClick={() => navigate('/submissions?status=APPROVED')}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-            <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-success)', fontWeight: 700, letterSpacing: '0.06em' }}>
-              CERTIFIED & APPROVED
+        {/* Card 4: Approved */}
+        <div
+          className="premium-card"
+          style={{ cursor: 'pointer' }}
+          onClick={() => navigate('/submissions?status=APPROVED')}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <span style={{ fontSize: '0.72rem', color: 'var(--archon-success)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Approved
             </span>
-            <div style={{ background: 'var(--archon-success-bg)', color: 'var(--archon-success)', padding: '6px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--archon-success-border)' }}>
+            <div style={{ background: 'rgba(52, 211, 153, 0.1)', color: 'var(--archon-success)', padding: '6px', borderRadius: '6px' }}>
               <CheckCircle2 size={15} />
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-            <span className="mono" style={{ fontSize: '1.85rem', fontWeight: 800, color: 'var(--archon-success)' }}>
-              {approvedCount}
-            </span>
-            <span className="tag-pill" style={{ color: 'var(--archon-success)', borderColor: 'var(--archon-success-border)' }}>
-              {summary?.approvalRate || 0}% Approval
-            </span>
+          <div style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--archon-success)', lineHeight: 1.1 }}>
+            {approvedCount}
           </div>
-          <div style={{ marginTop: '8px', fontSize: '0.72rem', color: 'var(--archon-text-muted)' }}>
-            All 6 domains verified & certified
+          <div style={{ marginTop: '8px', fontSize: '0.75rem', color: 'var(--archon-text-secondary)' }}>
+            {summary?.approvalRate || 0}% overall approval rate
           </div>
         </div>
 
       </div>
 
-      {/* 4. INTERACTIVE HIGH-TECH PIPELINE FLOW */}
-      <div className="card-award tech-bracket border-top-accent">
+      {/* 3. SLEEK CONNECTED REVIEW PIPELINE */}
+      <div className="premium-card">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Activity size={13} style={{ color: 'var(--archon-cyan)' }} />
-            <span className="mono" style={{ fontSize: '0.68rem', fontWeight: 700, color: 'var(--archon-text)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
-              ARCHITECTURE GOVERNANCE PIPELINE LIFECYCLE
-            </span>
-          </div>
-          <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-text-muted)' }}>
-            CLICK ANY STAGE TO FILTER REGISTRY
+          <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--archon-text)' }}>
+            Review Pipeline Flow
+          </span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--archon-text-muted)' }}>
+            Interactive stage navigation
           </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: '10px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
           
-          {/* Stage 1: Submitted */}
           <div
             onClick={() => navigate('/submissions')}
             style={{
               padding: '12px 14px',
-              background: 'var(--archon-bg)',
-              border: '1px solid var(--archon-border)',
-              borderLeft: '3px solid var(--archon-cyan)',
-              borderRadius: 'var(--radius-md)',
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '8px',
               cursor: 'pointer',
-              transition: 'all 0.2s var(--spring-bounce)'
+              transition: 'all 0.18s ease'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--archon-cyan)'}
-            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--archon-border)'}
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.06)'}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-text-muted)' }}>01. INGESTION</span>
-              <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-cyan)' }}>100%</span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
-              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--archon-text)' }}>SUBMITTED</span>
-              <span className="mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--archon-text)' }}>{totalCount}</span>
+            <div style={{ fontSize: '0.7rem', color: 'var(--archon-text-muted)', marginBottom: '4px' }}>01. Submitted</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--archon-text)' }}>{totalCount}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--archon-text-muted)' }}>100%</span>
             </div>
           </div>
 
-          {/* Stage 2: Not Reviewed */}
           <div
             onClick={() => navigate('/submissions?status=NOT_REVIEWED')}
             style={{
               padding: '12px 14px',
-              background: notReviewedCount > 0 ? 'var(--archon-cyan-bg)' : 'var(--archon-bg)',
-              border: notReviewedCount > 0 ? '1px solid var(--archon-cyan-border)' : '1px solid var(--archon-border)',
-              borderLeft: '3px solid var(--archon-cyan)',
-              borderRadius: 'var(--radius-md)',
+              background: notReviewedCount > 0 ? 'rgba(56, 189, 248, 0.04)' : 'rgba(255, 255, 255, 0.02)',
+              border: notReviewedCount > 0 ? '1px solid rgba(56, 189, 248, 0.25)' : '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '8px',
               cursor: 'pointer',
-              transition: 'all 0.2s var(--spring-bounce)'
+              transition: 'all 0.18s ease'
             }}
             onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--archon-cyan)'}
-            onMouseLeave={(e) => e.currentTarget.style.borderColor = notReviewedCount > 0 ? 'var(--archon-cyan-border)' : 'var(--archon-border)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = notReviewedCount > 0 ? 'rgba(56, 189, 248, 0.25)' : 'rgba(255, 255, 255, 0.06)'}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-cyan)' }}>02. TRIAGE</span>
-              <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-text-muted)' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--archon-cyan)', marginBottom: '4px' }}>02. Not Reviewed</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--archon-cyan)' }}>{notReviewedCount}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--archon-text-muted)' }}>
                 {totalCount > 0 ? Math.round((notReviewedCount / totalCount) * 100) : 0}%
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
-              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--archon-cyan)' }}>NOT REVIEWED</span>
-              <span className="mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--archon-cyan)' }}>{notReviewedCount}</span>
-            </div>
           </div>
 
-          {/* Stage 3: Needs Revision */}
           <div
             onClick={() => navigate('/submissions?status=NEEDS_REVISION')}
             style={{
               padding: '12px 14px',
-              background: needsRevisionCount > 0 ? 'var(--archon-warning-bg)' : 'var(--archon-bg)',
-              border: needsRevisionCount > 0 ? '1px solid var(--archon-warning-border)' : '1px solid var(--archon-border)',
-              borderLeft: '3px solid var(--archon-warning)',
-              borderRadius: 'var(--radius-md)',
+              background: needsRevisionCount > 0 ? 'rgba(251, 191, 36, 0.04)' : 'rgba(255, 255, 255, 0.02)',
+              border: needsRevisionCount > 0 ? '1px solid rgba(251, 191, 36, 0.25)' : '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '8px',
               cursor: 'pointer',
-              transition: 'all 0.2s var(--spring-bounce)'
+              transition: 'all 0.18s ease'
             }}
             onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--archon-warning)'}
-            onMouseLeave={(e) => e.currentTarget.style.borderColor = needsRevisionCount > 0 ? 'var(--archon-warning-border)' : 'var(--archon-border)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = needsRevisionCount > 0 ? 'rgba(251, 191, 36, 0.25)' : 'rgba(255, 255, 255, 0.06)'}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-warning)' }}>03. REVISION LOOP</span>
-              <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-warning)' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--archon-warning)', marginBottom: '4px' }}>03. Needs Revision</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--archon-warning)' }}>{needsRevisionCount}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--archon-text-muted)' }}>
                 {totalCount > 0 ? Math.round((needsRevisionCount / totalCount) * 100) : 0}%
               </span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
-              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--archon-warning)' }}>NEEDS REVISION</span>
-              <span className="mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--archon-warning)' }}>{needsRevisionCount}</span>
-            </div>
           </div>
 
-          {/* Stage 4: Approved */}
           <div
             onClick={() => navigate('/submissions?status=APPROVED')}
             style={{
               padding: '12px 14px',
-              background: approvedCount > 0 ? 'var(--archon-success-bg)' : 'var(--archon-bg)',
-              border: approvedCount > 0 ? '1px solid var(--archon-success-border)' : '1px solid var(--archon-border)',
-              borderLeft: '3px solid var(--archon-success)',
-              borderRadius: 'var(--radius-md)',
+              background: approvedCount > 0 ? 'rgba(52, 211, 153, 0.04)' : 'rgba(255, 255, 255, 0.02)',
+              border: approvedCount > 0 ? '1px solid rgba(52, 211, 153, 0.25)' : '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '8px',
               cursor: 'pointer',
-              transition: 'all 0.2s var(--spring-bounce)'
+              transition: 'all 0.18s ease'
             }}
             onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--archon-success)'}
-            onMouseLeave={(e) => e.currentTarget.style.borderColor = approvedCount > 0 ? 'var(--archon-success-border)' : 'var(--archon-border)'}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = approvedCount > 0 ? 'rgba(52, 211, 153, 0.25)' : 'rgba(255, 255, 255, 0.06)'}
           >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-success)' }}>04. GOVERNED</span>
-              <span className="mono" style={{ fontSize: '0.65rem', color: 'var(--archon-success)' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--archon-success)', marginBottom: '4px' }}>04. Approved</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--archon-success)' }}>{approvedCount}</span>
+              <span style={{ fontSize: '0.7rem', color: 'var(--archon-text-muted)' }}>
                 {summary?.approvalRate || 0}%
               </span>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '4px' }}>
-              <span style={{ fontWeight: 700, fontSize: '0.85rem', color: 'var(--archon-success)' }}>APPROVED</span>
-              <span className="mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--archon-success)' }}>{approvedCount}</span>
             </div>
           </div>
 
         </div>
       </div>
 
-      {/* 5. SPLIT INTELLIGENCE & ANALYTICS MATRIX */}
+      {/* 4. BALANCED 2-COLUMN INTELLIGENCE HUB */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))', gap: '16px' }}>
         
-        {/* Left Column: Governance Reasoning Compliance & Status Distribution */}
-        <div className="card-award tech-bracket" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        {/* Left Card: Review Distribution & Reasoning Compliance */}
+        <div className="premium-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <ShieldCheck size={14} style={{ color: 'var(--archon-cyan)' }} />
-                <span className="mono" style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--archon-text)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  REASONING COMPLIANCE & STATUS RADAR
-                </span>
-              </div>
-              <span className="tag-pill" style={{ color: 'var(--archon-cyan)', borderColor: 'var(--archon-cyan-border)' }}>
-                {summary?.reasoningRate || 0}% COMPLIANCE RATE
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--archon-text)' }}>
+                Review Status & Reasoning Compliance
+              </span>
+              <span className="badge-premium badge-cyan">
+                {reasoningRate}% Verified
               </span>
             </div>
 
-            {/* Donut Chart & Reasoning Breakdown */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', padding: '10px 0' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '24px', padding: '6px 0' }}>
               
-              {/* Centered Glowing Donut */}
-              <div style={{ width: 140, height: 140, position: 'relative', flexShrink: 0 }}>
+              {/* Clean Donut Chart */}
+              <div style={{ width: 130, height: 130, position: 'relative', flexShrink: 0 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={statusPieData.length > 0 ? statusPieData : [{ name: 'No Data', value: 1, color: '#171719' }]}
+                      data={statusPieData.length > 0 ? statusPieData : [{ name: 'Empty', value: 1, color: '#27272a' }]}
                       dataKey="value"
                       nameKey="name"
                       cx="50%"
                       cy="50%"
-                      innerRadius={46}
-                      outerRadius={66}
-                      paddingAngle={3}
+                      innerRadius={44}
+                      outerRadius={62}
+                      paddingAngle={4}
                       stroke="none"
                     >
-                      {(statusPieData.length > 0 ? statusPieData : [{ color: '#171719' }]).map((entry, index) => (
+                      {(statusPieData.length > 0 ? statusPieData : [{ color: '#27272a' }]).map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: 'var(--archon-surface-elevated)',
-                        borderColor: 'var(--archon-border)',
-                        color: 'var(--archon-text)',
-                        borderRadius: '6px',
-                        fontSize: '0.75rem'
+                        backgroundColor: '#18181b',
+                        borderColor: '#27272a',
+                        color: '#f4f4f5',
+                        borderRadius: '8px',
+                        fontSize: '0.75rem',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.5)'
                       }}
                     />
                   </PieChart>
                 </ResponsiveContainer>
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                  <span className="mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--archon-text)', lineHeight: 1 }}>
+                  <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--archon-text)', lineHeight: 1 }}>
                     {totalCount}
                   </span>
-                  <span className="mono" style={{ fontSize: '0.55rem', color: 'var(--archon-text-muted)', marginTop: '2px' }}>
-                    TOTAL
+                  <span style={{ fontSize: '0.6rem', color: 'var(--archon-text-muted)', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                    Total
                   </span>
                 </div>
               </div>
 
-              {/* Status & Reasoning Stats */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: 'var(--archon-bg)', border: '1px solid var(--archon-border)', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+              {/* Status & Reasoning List */}
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: 'var(--archon-text-secondary)' }}>
                     <CheckSquare size={13} style={{ color: 'var(--archon-success)' }} />
-                    <span style={{ fontSize: '0.78rem', color: 'var(--archon-text-secondary)' }}>Verified Reasoning</span>
+                    <span>Verified Reasoning</span>
                   </div>
-                  <span className="mono" style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--archon-success)' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--archon-success)' }}>
                     {summary?.reasoningIncluded || 0}
                   </span>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 10px', background: 'var(--archon-bg)', border: '1px solid var(--archon-border)', borderRadius: 'var(--radius-sm)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.78rem', color: 'var(--archon-text-secondary)' }}>
                     <XCircle size={13} style={{ color: 'var(--archon-warning)' }} />
-                    <span style={{ fontSize: '0.78rem', color: 'var(--archon-text-secondary)' }}>Missing Reasoning</span>
+                    <span>Missing Reasoning</span>
                   </div>
-                  <span className="mono" style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--archon-warning)' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--archon-warning)' }}>
                     {summary?.reasoningMissing || 0}
                   </span>
                 </div>
@@ -488,40 +421,32 @@ export const Dashboard = () => {
             </div>
           </div>
 
-          {/* ADR Compulsory Reasoning Notice */}
-          <div style={{ marginTop: '12px', padding: '10px 12px', background: 'var(--archon-bg)', border: '1px solid var(--archon-border)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Sparkles size={14} style={{ color: 'var(--archon-cyan)', flexShrink: 0 }} />
-            <span style={{ fontSize: '0.72rem', color: 'var(--archon-text-secondary)', lineHeight: 1.4 }}>
-              <strong>ADR Policy:</strong> Architectural decisions without justified reasoning (&gt; 5 chars) trigger compulsory revision flags.
-            </span>
+          <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: '0.72rem', color: 'var(--archon-text-muted)' }}>
+            Decisions without valid architectural reasoning (&gt; 5 chars) require intern revision before approval.
           </div>
         </div>
 
-        {/* Right Column: ARCHON Governance Score & 6-Domain Health Grid */}
-        <div className="card-award tech-bracket" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        {/* Right Card: Governance Health & Domain Scorecard */}
+        <div className="premium-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Cpu size={14} style={{ color: 'var(--archon-indigo)' }} />
-                <span className="mono" style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--archon-text)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                  ARCHON GOVERNANCE SCORECARD
-                </span>
-              </div>
-              <span className="status-hex status-approved" style={{ fontSize: '0.6rem' }}>
-                ● 91.4% OPTIMAL
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--archon-text)' }}>
+                System Governance Index
+              </span>
+              <span className="badge-premium badge-emerald">
+                91.4% Optimal
               </span>
             </div>
 
-            {/* Score Ring & Sub-Metrics */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '16px' }}>
               
-              {/* Glowing SVG Gauge */}
-              <div style={{ position: 'relative', width: '84px', height: '84px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg width="84" height="84" style={{ transform: 'rotate(-90deg)' }}>
-                  <circle cx="42" cy="42" r={radius} stroke="var(--archon-border)" strokeWidth="5" fill="transparent" />
+              {/* Clean Animated Score Ring */}
+              <div style={{ position: 'relative', width: '80px', height: '80px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <svg width="80" height="80" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="40" cy="40" r={radius} stroke="rgba(255,255,255,0.08)" strokeWidth="5" fill="transparent" />
                   <circle
-                    cx="42"
-                    cy="42"
+                    cx="40"
+                    cy="40"
                     r={radius}
                     stroke="var(--archon-cyan)"
                     strokeWidth="5"
@@ -529,57 +454,57 @@ export const Dashboard = () => {
                     strokeDasharray={circumference}
                     strokeDashoffset={strokeDashoffset}
                     strokeLinecap="round"
-                    style={{ transition: 'stroke-dashoffset 0.8s var(--spring-bounce)' }}
+                    style={{ transition: 'stroke-dashoffset 0.8s ease' }}
                   />
                 </svg>
                 <div style={{ position: 'absolute', textAlign: 'center' }}>
-                  <div className="mono" style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--archon-cyan)', lineHeight: 1 }}>
+                  <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--archon-text)', lineHeight: 1 }}>
                     {govScore}
                   </div>
-                  <div className="mono" style={{ fontSize: '0.5rem', color: 'var(--archon-text-muted)', marginTop: '2px' }}>
-                    INDEX
+                  <div style={{ fontSize: '0.55rem', color: 'var(--archon-text-muted)', marginTop: '2px' }}>
+                    / 100
                   </div>
                 </div>
               </div>
 
-              {/* 4 Dimension Bars */}
-              <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px 16px' }}>
+              {/* Sub-Metrics Progress Bars */}
+              <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px 18px' }}>
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--archon-text-muted)', marginBottom: '2px' }}>
-                    <span>REASONING</span>
-                    <span className="mono" style={{ color: 'var(--archon-cyan)' }}>{summary?.reasoningRate || 67}%</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--archon-text-muted)', marginBottom: '3px' }}>
+                    <span>Reasoning</span>
+                    <span style={{ color: 'var(--archon-text)', fontWeight: 600 }}>{reasoningRate}%</span>
                   </div>
-                  <div style={{ height: '3px', background: 'var(--archon-bg)', borderRadius: '2px', overflow: 'hidden' }}>
-                    <div style={{ width: `${summary?.reasoningRate || 67}%`, height: '100%', background: 'var(--archon-cyan)' }} />
+                  <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ width: `${reasoningRate}%`, height: '100%', background: 'var(--archon-cyan)' }} />
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--archon-text-muted)', marginBottom: '2px' }}>
-                    <span>ADR DEPTH</span>
-                    <span className="mono" style={{ color: 'var(--archon-indigo)' }}>88%</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--archon-text-muted)', marginBottom: '3px' }}>
+                    <span>ADR Depth</span>
+                    <span style={{ color: 'var(--archon-text)', fontWeight: 600 }}>88%</span>
                   </div>
-                  <div style={{ height: '3px', background: 'var(--archon-bg)', borderRadius: '2px', overflow: 'hidden' }}>
+                  <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', overflow: 'hidden' }}>
                     <div style={{ width: '88%', height: '100%', background: 'var(--archon-indigo)' }} />
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--archon-text-muted)', marginBottom: '2px' }}>
-                    <span>SAFETY</span>
-                    <span className="mono" style={{ color: 'var(--archon-success)' }}>94%</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--archon-text-muted)', marginBottom: '3px' }}>
+                    <span>Safety</span>
+                    <span style={{ color: 'var(--archon-text)', fontWeight: 600 }}>94%</span>
                   </div>
-                  <div style={{ height: '3px', background: 'var(--archon-bg)', borderRadius: '2px', overflow: 'hidden' }}>
+                  <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', overflow: 'hidden' }}>
                     <div style={{ width: '94%', height: '100%', background: 'var(--archon-success)' }} />
                   </div>
                 </div>
 
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: 'var(--archon-text-muted)', marginBottom: '2px' }}>
-                    <span>EVALS/OPS</span>
-                    <span className="mono" style={{ color: 'var(--archon-warning)' }}>91%</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: 'var(--archon-text-muted)', marginBottom: '3px' }}>
+                    <span>LLMOps</span>
+                    <span style={{ color: 'var(--archon-text)', fontWeight: 600 }}>91%</span>
                   </div>
-                  <div style={{ height: '3px', background: 'var(--archon-bg)', borderRadius: '2px', overflow: 'hidden' }}>
+                  <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', overflow: 'hidden' }}>
                     <div style={{ width: '91%', height: '100%', background: 'var(--archon-warning)' }} />
                   </div>
                 </div>
@@ -587,14 +512,15 @@ export const Dashboard = () => {
 
             </div>
 
-            {/* 6 Domains Micro Grid */}
+            {/* 6 Domains Minimalist Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
               {domainScores.map((d) => (
-                <div key={d.code} style={{ padding: '6px 8px', background: 'var(--archon-bg)', border: '1px solid var(--archon-border)', borderRadius: 'var(--radius-sm)' }}>
-                  <div className="mono" style={{ fontSize: '0.58rem', color: 'var(--archon-text-muted)' }}>{d.code}. {d.name}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '2px' }}>
-                    <span className="mono" style={{ fontSize: '0.78rem', fontWeight: 800, color: d.color }}>{d.score}%</span>
-                    <span className="mono" style={{ fontSize: '0.55rem', color: 'var(--archon-success)' }}>● PASS</span>
+                <div key={d.code} style={{ padding: '6px 10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '6px' }}>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--archon-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {d.name}
+                  </div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--archon-text)', marginTop: '2px' }}>
+                    {d.score}%
                   </div>
                 </div>
               ))}
@@ -605,108 +531,110 @@ export const Dashboard = () => {
 
       </div>
 
-      {/* 6. LIVE CAPSTONES QUEUE & REGISTRY TABLE */}
-      <div className="card-award tech-bracket" style={{ padding: '20px' }}>
+      {/* 5. RECENT SUBMISSIONS TABLE */}
+      <div className="premium-card" style={{ padding: '20px' }}>
         
-        {/* Table Header & Controls */}
+        {/* Table Controls */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
           <div>
-            <h3 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--archon-text)', margin: 0, letterSpacing: '-0.01em' }}>
-              Active Capstone Registry Queue
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--archon-text)', margin: 0 }}>
+              Recent Architecture Submissions
             </h3>
             <span style={{ fontSize: '0.75rem', color: 'var(--archon-text-muted)' }}>
-              Showing {filteredSubmissions.length} of {totalCount} total architecture submissions
+              Showing {filteredSubmissions.length} of {totalCount} total submissions
             </span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
             
-            {/* Live Search Input */}
+            {/* Search Input */}
             <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
               <Search size={13} style={{ position: 'absolute', left: '10px', color: 'var(--archon-text-muted)', pointerEvents: 'none' }} />
               <input
                 type="text"
-                placeholder="Filter by project, intern, domain..."
+                placeholder="Search projects, interns..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
                   paddingLeft: '28px',
                   paddingRight: '12px',
                   height: '32px',
-                  fontSize: '0.75rem',
-                  background: 'var(--archon-bg)',
-                  borderColor: 'var(--archon-border)',
-                  width: '220px'
+                  fontSize: '0.78rem',
+                  background: '#0e0e11',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '6px',
+                  color: 'var(--archon-text)',
+                  width: '200px'
                 }}
               />
             </div>
 
             {/* Status Filter Buttons */}
-            <div style={{ display: 'flex', background: 'var(--archon-bg)', border: '1px solid var(--archon-border)', borderRadius: 'var(--radius-sm)', padding: '2px' }}>
+            <div style={{ display: 'flex', background: '#0e0e11', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '6px', padding: '2px' }}>
               {['ALL', 'NOT_REVIEWED', 'NEEDS_REVISION', 'APPROVED'].map((st) => (
                 <button
                   key={st}
                   onClick={() => setStatusFilter(st)}
-                  className="mono"
                   style={{
                     padding: '3px 8px',
-                    fontSize: '0.65rem',
-                    fontWeight: 700,
-                    borderRadius: '2px',
-                    background: statusFilter === st ? 'var(--archon-surface-hover)' : 'transparent',
-                    color: statusFilter === st ? 'var(--archon-cyan)' : 'var(--archon-text-muted)',
+                    fontSize: '0.7rem',
+                    fontWeight: 500,
+                    borderRadius: '4px',
+                    background: statusFilter === st ? 'rgba(255,255,255,0.08)' : 'transparent',
+                    color: statusFilter === st ? '#FFFFFF' : 'var(--archon-text-muted)',
                     border: 'none',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease'
                   }}
                 >
-                  {st === 'NOT_REVIEWED' ? 'PENDING' : st === 'NEEDS_REVISION' ? 'REVISION' : st}
+                  {st === 'NOT_REVIEWED' ? 'Not Reviewed' : st === 'NEEDS_REVISION' ? 'Revision' : st === 'APPROVED' ? 'Approved' : 'All'}
                 </button>
               ))}
             </div>
 
-            <Link to="/submissions" className="btn btn-secondary btn-sm" style={{ height: '32px' }}>
-              View Full Table <ArrowRight size={13} />
+            <Link to="/submissions" className="btn btn-secondary btn-sm" style={{ height: '32px', borderRadius: '6px' }}>
+              View All <ArrowRight size={13} />
             </Link>
           </div>
         </div>
 
         {/* Table Content */}
-        <div className="table-container">
+        <div className="table-container" style={{ border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px' }}>
           <table>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>PROJECT TITLE</th>
-                <th>DOMAIN</th>
-                <th>INTERN</th>
-                <th>STATUS</th>
-                <th>REASONING GATE</th>
-                <th>SUBMITTED</th>
-                <th style={{ textAlign: 'right' }}>ACTION</th>
+                <th style={{ background: '#0e0e11' }}>ID</th>
+                <th style={{ background: '#0e0e11' }}>Project Title</th>
+                <th style={{ background: '#0e0e11' }}>Domain</th>
+                <th style={{ background: '#0e0e11' }}>Intern</th>
+                <th style={{ background: '#0e0e11' }}>Status</th>
+                <th style={{ background: '#0e0e11' }}>Reasoning</th>
+                <th style={{ background: '#0e0e11' }}>Submitted</th>
+                <th style={{ background: '#0e0e11', textAlign: 'right' }}>Action</th>
               </tr>
             </thead>
             <tbody>
               {filteredSubmissions.length === 0 ? (
                 <tr>
                   <td colSpan="8" style={{ textAlign: 'center', padding: '36px', color: 'var(--archon-text-muted)' }}>
-                    No capstone submissions matching the search and filter criteria.
+                    No matching submissions found.
                   </td>
                 </tr>
               ) : (
                 filteredSubmissions.map((sub) => (
                   <tr key={sub.id}>
-                    <td className="mono" style={{ fontSize: '0.72rem', color: 'var(--archon-text-muted)', fontWeight: 700 }}>
-                      ARCH-{String(sub.id).padStart(3, '0')}
+                    <td style={{ fontSize: '0.75rem', color: 'var(--archon-text-muted)', fontFamily: 'var(--font-mono)' }}>
+                      #{sub.id}
                     </td>
-                    <td style={{ fontWeight: 700, color: 'var(--archon-text)' }}>
+                    <td style={{ fontWeight: 600, color: 'var(--archon-text)' }}>
                       {sub.projectTitle}
                     </td>
                     <td>
-                      <span className="tag-pill" style={{ color: 'var(--archon-indigo)', borderColor: 'var(--archon-indigo-border)', background: 'var(--archon-indigo-bg)' }}>
+                      <span className="badge-premium badge-gray">
                         {sub.projectDomain || 'GenAI'}
                       </span>
                     </td>
-                    <td style={{ color: 'var(--archon-text-secondary)', fontSize: '0.78rem' }}>
+                    <td style={{ color: 'var(--archon-text-secondary)', fontSize: '0.8rem' }}>
                       {sub.internName}
                     </td>
                     <td>
@@ -715,7 +643,7 @@ export const Dashboard = () => {
                     <td>
                       <ReasoningBadge included={sub.reasoningIncluded} />
                     </td>
-                    <td className="mono" style={{ fontSize: '0.72rem', color: 'var(--archon-text-muted)' }}>
+                    <td style={{ fontSize: '0.75rem', color: 'var(--archon-text-muted)' }}>
                       {sub.dateSubmitted}
                     </td>
                     <td style={{ textAlign: 'right' }}>
@@ -725,11 +653,10 @@ export const Dashboard = () => {
                         style={{
                           fontSize: '0.72rem',
                           padding: '4px 10px',
-                          color: 'var(--archon-cyan)',
-                          borderColor: 'var(--archon-cyan-border)'
+                          borderRadius: '6px'
                         }}
                       >
-                        Review Workstation <ArrowRight size={12} />
+                        Review <ArrowRight size={12} />
                       </Link>
                     </td>
                   </tr>

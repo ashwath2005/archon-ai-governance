@@ -5,21 +5,21 @@ export const StatusBadge = ({ status }) => {
   switch (status) {
     case 'APPROVED':
       return (
-        <span className="status-hex status-approved">
-          <CheckCircle2 size={11} /> APPROVED
+        <span className="badge-premium badge-emerald">
+          <span className="badge-dot" /> Approved
         </span>
       );
     case 'NEEDS_REVISION':
       return (
-        <span className="status-hex status-revision">
-          <AlertCircle size={11} /> REVISION
+        <span className="badge-premium badge-amber">
+          <span className="badge-dot" /> Needs Revision
         </span>
       );
     case 'NOT_REVIEWED':
     default:
       return (
-        <span className="status-hex status-not-reviewed">
-          <Clock size={11} /> NOT REVIEWED
+        <span className="badge-premium badge-cyan">
+          <span className="badge-dot" /> Not Reviewed
         </span>
       );
   }
@@ -27,12 +27,12 @@ export const StatusBadge = ({ status }) => {
 
 export const ReasoningBadge = ({ included }) => {
   return included ? (
-    <span className="status-hex status-approved" style={{ fontSize: '0.65rem' }}>
-      <Check size={11} /> VALID
+    <span className="badge-premium badge-emerald" style={{ fontSize: '0.7rem' }}>
+      <Check size={11} /> Verified
     </span>
   ) : (
-    <span className="status-hex status-revision" style={{ fontSize: '0.65rem' }}>
-      <X size={11} /> MISSING
+    <span className="badge-premium badge-amber" style={{ fontSize: '0.7rem' }}>
+      <X size={11} /> Missing
     </span>
   );
 };
