@@ -71,7 +71,7 @@ export const Topbar = () => {
             </kbd>
           </button>
 
-          {isIntern && (
+          {isIntern && location.pathname !== '/submissions/new' && (
             <Link to="/submissions/new" className="btn btn-primary btn-sm" style={{ borderRadius: '8px', padding: '6px 12px' }}>
               <Plus size={13} /> Submit Architecture
             </Link>
