@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import axiosClient from '../api/axiosClient';
 import { useAuth } from '../context/AuthContext';
-import { ArrowLeft, Save } from 'lucide-react';
-import { Button } from '../components/common/Button';
+import { ArrowLeft, Save, AlertCircle } from 'lucide-react';
 
 export const SubmissionFormPage = () => {
   const { id } = useParams();
@@ -71,27 +70,32 @@ export const SubmissionFormPage = () => {
   };
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div style={{ maxWidth: '640px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '20px' }} className="page-transition">
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button className="btn btn-secondary btn-sm" onClick={() => navigate('/submissions')}>
-          <ArrowLeft size={13} /> Back
+        <button className="btn btn-secondary btn-sm" onClick={() => navigate('/submissions')} style={{ borderRadius: '8px' }}>
+          <ArrowLeft size={14} /> Back
         </button>
-        <h1 className="font-brand" style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--archon-text)' }}>
-          {isEdit ? 'EDIT CAPSTONE SUBMISSION' : 'NEW CAPSTONE SUBMISSION'}
-        </h1>
+        <div>
+          <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--archon-text)', margin: 0, letterSpacing: '-0.02em' }}>
+            {isEdit ? 'Edit Architecture Submission' : 'New Architecture Submission'}
+          </h1>
+          <p style={{ color: 'var(--archon-text-secondary)', fontSize: '0.8rem', marginTop: '2px' }}>
+            Provide capstone details and architecture repository links for review
+          </p>
+        </div>
       </div>
 
-      <div style={{ background: 'var(--archon-surface)', border: '1px solid var(--archon-border)', borderRadius: 'var(--radius-lg)', padding: '24px' }}>
+      <div className="premium-card" style={{ padding: '28px' }}>
         {error && (
-          <div style={{ background: 'var(--archon-danger-bg)', border: '1px solid var(--archon-danger-border)', color: 'var(--archon-danger)', padding: '8px 12px', borderRadius: 'var(--radius-md)', marginBottom: '16px', fontSize: '0.8rem' }}>
-            {error}
+          <div style={{ background: 'rgba(251, 113, 133, 0.1)', border: '1px solid rgba(251, 113, 133, 0.25)', color: '#FB7185', padding: '10px 12px', borderRadius: '8px', marginBottom: '18px', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <AlertCircle size={14} /> {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
-            <label className="mono" style={{ display: 'block', fontSize: '0.68rem', fontWeight: 600, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              INTERN NAME
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--archon-text-secondary)', marginBottom: '5px' }}>
+              Intern Name
             </label>
             <input
               type="text"
@@ -99,14 +103,22 @@ export const SubmissionFormPage = () => {
               required
               value={formData.internName}
               onChange={handleChange}
-              placeholder="Rahul Kumar"
-              style={{ width: '100%' }}
+              placeholder="e.g. Alex Rivera"
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                fontSize: '0.82rem',
+                background: '#0e0e11',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                color: 'var(--archon-text)'
+              }}
             />
           </div>
 
           <div>
-            <label className="mono" style={{ display: 'block', fontSize: '0.68rem', fontWeight: 600, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              PROJECT TITLE
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--archon-text-secondary)', marginBottom: '5px' }}>
+              Project Title
             </label>
             <input
               type="text"
@@ -114,29 +126,49 @@ export const SubmissionFormPage = () => {
               required
               value={formData.projectTitle}
               onChange={handleChange}
-              placeholder="Enterprise RAG Knowledge Assistant"
-              style={{ width: '100%' }}
+              placeholder="e.g. MedRAG: Multi-Agent Clinical Decision Support"
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                fontSize: '0.82rem',
+                background: '#0e0e11',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                color: 'var(--archon-text)'
+              }}
             />
           </div>
 
           <div>
-            <label className="mono" style={{ display: 'block', fontSize: '0.68rem', fontWeight: 600, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              PROJECT DOMAIN
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--archon-text-secondary)', marginBottom: '5px' }}>
+              Domain Focus
             </label>
-            <select name="projectDomain" value={formData.projectDomain} onChange={handleChange} style={{ width: '100%' }}>
-              <option value="Healthcare">Healthcare</option>
-              <option value="Finance">Finance</option>
-              <option value="E-Commerce">E-Commerce</option>
-              <option value="Legal Tech">Legal Tech</option>
-              <option value="Education">Education</option>
-              <option value="Developer Tools">Developer Tools</option>
-              <option value="Cybersecurity">Cybersecurity</option>
+            <select
+              name="projectDomain"
+              value={formData.projectDomain}
+              onChange={handleChange}
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                fontSize: '0.82rem',
+                background: '#0e0e11',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                color: 'var(--archon-text)'
+              }}
+            >
+              <option value="Healthcare">Healthcare & Clinical AI</option>
+              <option value="Finance">Finance & Risk Modeling</option>
+              <option value="Legal">Legal & Contract Analytics</option>
+              <option value="E-Commerce">E-Commerce & Agentic Search</option>
+              <option value="DevTools">Developer Tools & Code Generation</option>
+              <option value="General">General Enterprise GenAI</option>
             </select>
           </div>
 
           <div>
-            <label className="mono" style={{ display: 'block', fontSize: '0.68rem', fontWeight: 600, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              GITHUB REPOSITORY LINK
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--archon-text-secondary)', marginBottom: '5px' }}>
+              GitHub Repository URL
             </label>
             <input
               type="url"
@@ -144,14 +176,22 @@ export const SubmissionFormPage = () => {
               required
               value={formData.githubUrl}
               onChange={handleChange}
-              placeholder="https://github.com/username/capstone-repo"
-              style={{ width: '100%' }}
+              placeholder="https://github.com/org/repo"
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                fontSize: '0.82rem',
+                background: '#0e0e11',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                color: 'var(--archon-text)'
+              }}
             />
           </div>
 
           <div>
-            <label className="mono" style={{ display: 'block', fontSize: '0.68rem', fontWeight: 600, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              MAPPING ONE-PAGER DOCUMENT LINK
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--archon-text-secondary)', marginBottom: '5px' }}>
+              Architecture 1-Pager URL / Design Document
             </label>
             <input
               type="url"
@@ -159,28 +199,37 @@ export const SubmissionFormPage = () => {
               required
               value={formData.onePagerUrl}
               onChange={handleChange}
-              placeholder="https://notion.so/username/one-pager-mapping"
-              style={{ width: '100%' }}
+              placeholder="https://docs.google.com/document/d/..."
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                fontSize: '0.82rem',
+                background: '#0e0e11',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                color: 'var(--archon-text)'
+              }}
             />
           </div>
 
-          <div>
-            <label className="mono" style={{ display: 'block', fontSize: '0.68rem', fontWeight: 600, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              DATE SUBMITTED
-            </label>
-            <input
-              type="date"
-              name="dateSubmitted"
-              required
-              value={formData.dateSubmitted}
-              onChange={handleChange}
-              style={{ width: '100%' }}
-            />
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+            <button
+              type="button"
+              onClick={() => navigate('/submissions')}
+              className="btn btn-secondary"
+              style={{ padding: '8px 16px', borderRadius: '8px' }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="btn btn-primary"
+              style={{ padding: '8px 20px', borderRadius: '8px' }}
+            >
+              {submitting ? 'Saving...' : isEdit ? 'Update Submission' : 'Submit Architecture'}
+            </button>
           </div>
-
-          <Button type="submit" variant="primary" disabled={submitting} style={{ marginTop: '8px', padding: '10px' }}>
-            <Save size={14} /> {submitting ? 'Saving...' : isEdit ? 'Save Changes' : 'Submit Project Architecture'}
-          </Button>
         </form>
       </div>
     </div>

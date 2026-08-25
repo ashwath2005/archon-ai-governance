@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { UserPlus, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import archonLogo from '../logo/ARCHON .svg';
 
 export const Register = () => {
@@ -34,35 +34,36 @@ export const Register = () => {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000000', padding: '24px' }}>
       <div
+        className="premium-card"
         style={{
           width: '100%',
           maxWidth: '420px',
-          background: 'var(--archon-surface)',
-          border: '1px solid var(--archon-border)',
-          borderRadius: 'var(--radius-lg)',
-          padding: '36px 32px'
+          padding: '36px 30px',
+          background: '#09090b',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '14px'
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <img src={archonLogo} alt="ARCHON Logo" style={{ height: '48px', width: 'auto', marginBottom: '12px', objectFit: 'contain' }} />
-          <h2 className="font-brand" style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--archon-text)', marginBottom: '6px' }}>
-            ARCHON
+          <img src={archonLogo} alt="ARCHON Logo" style={{ height: '42px', width: 'auto', marginBottom: '12px', objectFit: 'contain' }} />
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--archon-text)', margin: 0, letterSpacing: '-0.01em' }}>
+            Create an Account
           </h2>
-          <div className="brand-tagline">
-            ACCOUNT REGISTRATION
-          </div>
+          <p style={{ color: 'var(--archon-text-secondary)', fontSize: '0.8rem', marginTop: '4px' }}>
+            Join the ARCHON AI Governance Network
+          </p>
         </div>
 
         {error && (
-          <div style={{ background: 'var(--archon-danger-bg)', border: '1px solid var(--archon-danger-border)', color: 'var(--archon-danger)', padding: '8px 12px', borderRadius: 'var(--radius-md)', marginBottom: '18px', fontSize: '0.775rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ background: 'rgba(251, 113, 133, 0.1)', border: '1px solid rgba(251, 113, 133, 0.25)', color: '#FB7185', padding: '10px 12px', borderRadius: '8px', marginBottom: '18px', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <AlertCircle size={14} /> {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div>
-            <label className="mono" style={{ display: 'block', fontSize: '0.68rem', fontWeight: 600, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              FULL NAME
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--archon-text-secondary)', marginBottom: '5px' }}>
+              Full name
             </label>
             <input
               type="text"
@@ -70,13 +71,21 @@ export const Register = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Alex Rivera"
-              style={{ width: '100%' }}
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                fontSize: '0.82rem',
+                background: '#0e0e11',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                color: 'var(--archon-text)'
+              }}
             />
           </div>
 
           <div>
-            <label className="mono" style={{ display: 'block', fontSize: '0.68rem', fontWeight: 600, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              EMAIL ADDRESS
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--archon-text-secondary)', marginBottom: '5px' }}>
+              Email address
             </label>
             <input
               type="email"
@@ -84,13 +93,21 @@ export const Register = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="alex@example.com"
-              style={{ width: '100%' }}
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                fontSize: '0.82rem',
+                background: '#0e0e11',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                color: 'var(--archon-text)'
+              }}
             />
           </div>
 
           <div>
-            <label className="mono" style={{ display: 'block', fontSize: '0.68rem', fontWeight: 600, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              PASSWORD
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--archon-text-secondary)', marginBottom: '5px' }}>
+              Password
             </label>
             <input
               type="password"
@@ -98,28 +115,56 @@ export const Register = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              style={{ width: '100%' }}
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                fontSize: '0.82rem',
+                background: '#0e0e11',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                color: 'var(--archon-text)'
+              }}
             />
           </div>
 
           <div>
-            <label className="mono" style={{ display: 'block', fontSize: '0.68rem', fontWeight: 600, color: 'var(--archon-text-muted)', marginBottom: '4px', textTransform: 'uppercase' }}>
-              SYSTEM ROLE
+            <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--archon-text-secondary)', marginBottom: '5px' }}>
+              Select Role
             </label>
-            <select value={role} onChange={(e) => setRole(e.target.value)} style={{ width: '100%' }}>
-              <option value="INTERN">Intern (Submit Projects)</option>
-              <option value="REVIEWER">Reviewer (Evaluate Architecture)</option>
-              <option value="ADMIN">Administrator (System Control)</option>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                fontSize: '0.82rem',
+                background: '#0e0e11',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '8px',
+                color: 'var(--archon-text)'
+              }}
+            >
+              <option value="INTERN">Intern (Submit Capstones)</option>
+              <option value="REVIEWER">Reviewer (Evaluate Architectures)</option>
+              <option value="ADMIN">Admin (Full System Access)</option>
             </select>
           </div>
 
-          <button type="submit" className="btn btn-primary" disabled={submitting} style={{ marginTop: '6px', padding: '10px' }}>
-            {submitting ? 'Registering...' : <><UserPlus size={15} /> Create Account</>}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn btn-primary"
+            style={{ marginTop: '8px', padding: '10px', borderRadius: '8px', fontSize: '0.84rem', fontWeight: 600 }}
+          >
+            {submitting ? 'Creating account...' : 'Create Account'}
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '18px', fontSize: '0.775rem', color: 'var(--archon-text-muted)' }}>
-          Already registered? <Link to="/login" style={{ color: 'var(--archon-cyan)', fontWeight: 600 }}>Sign In</Link>
+        <div style={{ marginTop: '20px', textAlign: 'center', fontSize: '0.78rem', color: 'var(--archon-text-secondary)' }}>
+          Already registered?{' '}
+          <Link to="/login" style={{ color: 'var(--archon-cyan)', fontWeight: 600 }}>
+            Sign In
+          </Link>
         </div>
       </div>
     </div>

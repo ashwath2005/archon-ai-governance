@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
 import { LoadingSkeleton } from '../components/common/LoadingSkeleton';
-import { ChevronRight, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { ChevronRight, Shield, CheckCircle2 } from 'lucide-react';
 
 export const RubricPage = () => {
   const [sections, setSections] = useState([]);
@@ -33,20 +33,20 @@ export const RubricPage = () => {
     '06': { purpose: 'PII masking, prompt injection guards, and immutable audit logging must be enforced.', evalAreas: 'PII Masking · Injection Guards · Hallucination Filter · Audit', commonRisk: 'Unsanitized user inputs reaching raw LLM orchestrator' }
   };
 
-  if (loading) return <LoadingSkeleton count={6} height="90px" />;
+  if (loading) return <LoadingSkeleton count={6} height="100px" />;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="page-transition">
       <div>
-        <h1 className="font-brand" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--archon-text)', marginBottom: '2px' }}>
-          ARCHITECTURE STANDARD
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--archon-text)', margin: 0, letterSpacing: '-0.02em' }}>
+          Architecture Standard Rubric
         </h1>
-        <p style={{ color: 'var(--archon-text-muted)', fontSize: '0.8rem' }}>
-          The six domains governing GenAI architecture quality.
+        <p style={{ color: 'var(--archon-text-secondary)', fontSize: '0.85rem', marginTop: '2px' }}>
+          The six evaluation domains governing enterprise GenAI architectural compliance
         </p>
       </div>
 
-      {/* Interactive 6-Domain Engineering Module Cards */}
+      {/* 6-Domain Cards Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '16px' }}>
         {sections.map((sec) => {
           const isExpanded = expandedCode === sec.code;
@@ -55,69 +55,55 @@ export const RubricPage = () => {
           return (
             <div
               key={sec.code}
-              style={{
-                background: 'var(--archon-surface)',
-                border: '1px solid var(--archon-border)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '20px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                transition: 'border-color var(--motion-fast)'
-              }}
+              className="premium-card"
+              style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
             >
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-                  <span className="mono" style={{ fontSize: '0.7rem', fontWeight: 800, background: 'var(--archon-cyan-bg)', color: 'var(--archon-cyan)', padding: '2px 8px', borderRadius: '4px', border: '1px solid var(--archon-cyan-border)' }}>
-                    DOMAIN {sec.code}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <span className="badge-premium badge-cyan">
+                    Domain {sec.code}
                   </span>
-                  <span className="mono" style={{ fontSize: '0.7rem', color: 'var(--archon-text-muted)' }}>
-                    {sec.items?.length || 0} CRITERIA
+                  <span style={{ fontSize: '0.72rem', color: 'var(--archon-text-muted)' }}>
+                    {sec.items?.length || 0} Criteria
                   </span>
                 </div>
 
-                <h2 style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--archon-text)', marginBottom: '6px' }}>
+                <h2 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--archon-text)', marginBottom: '6px' }}>
                   {sec.title}
                 </h2>
 
-                <p style={{ color: 'var(--archon-text-secondary)', fontSize: '0.8rem', marginBottom: '12px', lineHeight: 1.4 }}>
+                <p style={{ color: 'var(--archon-text-secondary)', fontSize: '0.82rem', marginBottom: '12px', lineHeight: 1.45 }}>
                   {meta.purpose}
                 </p>
 
-                <div className="mono" style={{ fontSize: '0.7rem', color: 'var(--archon-text-muted)', marginBottom: '16px' }}>
-                  Areas: <strong style={{ color: 'var(--archon-text)' }}>{meta.evalAreas}</strong>
+                <div style={{ fontSize: '0.75rem', color: 'var(--archon-text-muted)', marginBottom: '16px' }}>
+                  Focus: <strong style={{ color: 'var(--archon-text)' }}>{meta.evalAreas}</strong>
                 </div>
               </div>
 
-              {/* Criteria Specification Drawer Toggle */}
+              {/* Expand Toggle */}
               <div>
                 <button
                   onClick={() => setExpandedCode(isExpanded ? null : sec.code)}
                   className="btn btn-secondary btn-sm"
-                  style={{ width: '100%', justifyContent: 'space-between' }}
+                  style={{ width: '100%', justifyContent: 'space-between', borderRadius: '6px' }}
                 >
-                  <span>{isExpanded ? 'Hide Criteria Specifications' : 'Explore Criteria Specifications'}</span>
-                  <ChevronRight size={14} style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform var(--motion-fast)' }} />
+                  <span>{isExpanded ? 'Hide Criteria Specifications' : 'View Criteria Specifications'}</span>
+                  <ChevronRight size={14} style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.18s ease' }} />
                 </button>
 
                 {isExpanded && (
-                  <div className="animate-fade-in" style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--archon-border)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ padding: '8px 10px', background: 'var(--archon-danger-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--archon-danger-border)', fontSize: '0.725rem' }}>
-                      <strong className="mono" style={{ color: 'var(--archon-danger)' }}>COMMON GOVERNANCE RISK:</strong>
-                      <div style={{ color: 'var(--archon-text-secondary)', marginTop: '2px' }}>{meta.commonRisk}</div>
-                    </div>
-
+                  <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     {sec.items?.map((item) => (
-                      <div key={item.id} style={{ padding: '8px 10px', background: 'var(--archon-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--archon-border)', fontSize: '0.75rem' }}>
-                        <div style={{ fontWeight: 700, color: 'var(--archon-text)' }}>{item.title}</div>
-                        <div style={{ color: 'var(--archon-text-muted)', fontSize: '0.7rem', marginTop: '2px' }}>{item.description}</div>
-                        <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
-                          {item.allowedOptions?.split(',').map((opt) => (
-                            <span key={opt} className="mono" style={{ fontSize: '0.65rem', padding: '1px 4px', borderRadius: '3px', background: 'var(--archon-surface)', color: 'var(--archon-text-secondary)', border: '1px solid var(--archon-border)' }}>
-                              {opt.trim()}
-                            </span>
-                          ))}
+                      <div key={item.id} style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '6px' }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.78rem', color: 'var(--archon-text)' }}>
+                          {item.key} — {item.label}
                         </div>
+                        {item.description && (
+                          <div style={{ fontSize: '0.72rem', color: 'var(--archon-text-muted)', marginTop: '2px' }}>
+                            {item.description}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

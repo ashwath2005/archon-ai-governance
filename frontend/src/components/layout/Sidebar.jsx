@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -6,13 +6,9 @@ import {
   BookOpen,
   BarChart2,
   LogOut,
-  ShieldCheck,
   ChevronLeft,
   ChevronRight,
-  Shield,
-  Activity,
-  Zap,
-  Sliders
+  ShieldCheck
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import archonLogo from '../../logo/ARCHON .svg';
@@ -46,8 +42,8 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
     <aside
       style={{
         width: isCollapsed ? '68px' : '240px',
-        backgroundColor: 'var(--archon-bg)',
-        borderRight: '1px solid var(--archon-border)',
+        backgroundColor: '#09090b',
+        borderRight: '1px solid rgba(255, 255, 255, 0.08)',
         padding: isCollapsed ? '16px 10px' : '16px 14px',
         display: 'flex',
         flexDirection: 'column',
@@ -56,7 +52,7 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
         top: 0,
         left: 0,
         zIndex: 50,
-        transition: 'width var(--motion-normal)'
+        transition: 'width 0.2s ease'
       }}
     >
       {/* Brand Header */}
@@ -66,7 +62,7 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
           alignItems: 'center',
           justifyContent: isCollapsed ? 'center' : 'space-between',
           paddingBottom: '16px',
-          borderBottom: '1px solid var(--archon-border)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
           marginBottom: '16px'
         }}
       >
@@ -75,8 +71,8 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
             src={archonLogo}
             alt="ARCHON Logo"
             style={{
-              height: '32px',
-              width: '32px',
+              height: '30px',
+              width: '30px',
               borderRadius: '6px',
               objectFit: 'contain',
               flexShrink: 0
@@ -84,11 +80,11 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
           />
           {!isCollapsed && (
             <div>
-              <h2 className="font-brand" style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--archon-text)', lineHeight: 1.1 }}>
+              <h2 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--archon-text)', margin: 0, letterSpacing: '0.04em' }}>
                 ARCHON
               </h2>
-              <span className="mono" style={{ fontSize: '0.55rem', color: 'var(--archon-text-muted)', letterSpacing: '0.08em', display: 'block', marginTop: '2px' }}>
-                GOVERNANCE OS
+              <span style={{ fontSize: '0.62rem', color: 'var(--archon-text-muted)', display: 'block', marginTop: '1px' }}>
+                Governance OS
               </span>
             </div>
           )}
@@ -97,10 +93,10 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
         <button
           onClick={onToggleCollapse}
           className="btn btn-ghost btn-sm"
-          style={{ padding: '4px', color: 'var(--archon-text-muted)', borderRadius: '4px' }}
+          style={{ padding: '4px', color: 'var(--archon-text-muted)', borderRadius: '6px' }}
           title={isCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
         >
-          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          {isCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
         </button>
       </div>
 
@@ -114,20 +110,19 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
             <div key={section.title}>
               {!isCollapsed && (
                 <div
-                  className="mono"
                   style={{
-                    fontSize: '0.6rem',
-                    fontWeight: 700,
+                    fontSize: '0.65rem',
+                    fontWeight: 600,
                     color: 'var(--archon-text-muted)',
                     marginBottom: '6px',
-                    paddingLeft: '8px',
-                    letterSpacing: '0.08em'
+                    paddingLeft: '10px',
+                    letterSpacing: '0.04em'
                   }}
                 >
                   {section.title}
                 </div>
               )}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
                 {visibleItems.map((item) => (
                   <NavLink
                     key={item.path}
@@ -139,14 +134,13 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
                       gap: '10px',
                       padding: isCollapsed ? '10px 0' : '8px 10px',
                       justifyContent: isCollapsed ? 'center' : 'flex-start',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      borderRadius: 'var(--radius-md)',
+                      fontSize: '0.82rem',
+                      fontWeight: isActive ? 600 : 500,
+                      borderRadius: '8px',
                       textDecoration: 'none',
-                      backgroundColor: isActive ? 'var(--archon-surface-subtle)' : 'transparent',
-                      color: isActive ? 'var(--archon-text)' : 'var(--archon-text-secondary)',
-                      borderLeft: isActive ? '3px solid var(--archon-cyan)' : '3px solid transparent',
-                      transition: 'all var(--motion-fast)'
+                      backgroundColor: isActive ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+                      color: isActive ? '#FFFFFF' : 'var(--archon-text-secondary)',
+                      transition: 'all 0.15s ease'
                     })}
                   >
                     {({ isActive }) => (
@@ -169,29 +163,28 @@ export const Sidebar = ({ isCollapsed, onToggleCollapse }) => {
         })}
       </nav>
 
-      {/* User Footer Profile */}
-      <div style={{ paddingTop: '12px', borderTop: '1px solid var(--archon-border)' }}>
+      {/* User Profile Footer */}
+      <div style={{ paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
         {!isCollapsed && (
-          <div style={{ marginBottom: '10px', padding: '8px 10px', background: 'var(--archon-surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--archon-border)' }}>
-            <div style={{ fontWeight: 700, fontSize: '0.775rem', color: 'var(--archon-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <div style={{ marginBottom: '10px', padding: '10px', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+            <div style={{ fontWeight: 600, fontSize: '0.8rem', color: 'var(--archon-text)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {user?.name}
             </div>
             <div style={{ fontSize: '0.7rem', color: 'var(--archon-text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {user?.email}
             </div>
-            <span
-              className="status-pill status-approved"
-              style={{ marginTop: '4px', fontSize: '0.6rem', padding: '1px 6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-            >
-              <ShieldCheck size={10} /> {user?.role}
-            </span>
+            <div style={{ marginTop: '6px' }}>
+              <span className="badge-premium badge-emerald" style={{ fontSize: '0.62rem', padding: '2px 8px' }}>
+                <ShieldCheck size={10} /> {user?.role}
+              </span>
+            </div>
           </div>
         )}
 
         <button
           onClick={logout}
           className="btn btn-secondary btn-sm"
-          style={{ width: '100%', justifyContent: isCollapsed ? 'center' : 'flex-start', color: 'var(--archon-danger)' }}
+          style={{ width: '100%', justifyContent: isCollapsed ? 'center' : 'flex-start', color: 'var(--archon-danger)', borderRadius: '6px' }}
           title="Sign Out"
         >
           <LogOut size={14} /> {!isCollapsed && 'Sign Out'}
