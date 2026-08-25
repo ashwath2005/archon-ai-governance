@@ -304,3 +304,94 @@ input:focus, select:focus, textarea:focus {
 .mono {
   font-family: var(--font-mono);
 }
+
+
+/* ==========================================================================
+   ADVANCED OLED COMMAND CENTER UTILITIES
+   ========================================================================== */
+
+.glass-panel {
+  background: linear-gradient(180deg, rgba(16, 16, 20, 0.7) 0%, rgba(8, 8, 10, 0.9) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--archon-border);
+  border-radius: var(--radius-lg);
+}
+
+.kpi-card {
+  position: relative;
+  background: linear-gradient(180deg, rgba(18, 18, 22, 0.85) 0%, rgba(7, 7, 9, 0.95) 100%);
+  border: 1px solid var(--archon-border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  overflow: hidden;
+  transition: all 0.25s var(--spring-bounce);
+}
+
+.kpi-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--kpi-accent, var(--archon-cyan));
+  opacity: 0.8;
+  transition: opacity 0.25s;
+}
+
+.kpi-card:hover {
+  border-color: var(--kpi-accent-border, var(--archon-border-hover));
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.6);
+}
+
+.pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--archon-cyan);
+  box-shadow: 0 0 8px var(--archon-cyan);
+  animation: pulseGlow 2s infinite;
+}
+
+.pulse-dot-emerald {
+  background: var(--archon-success);
+  box-shadow: 0 0 8px var(--archon-success);
+}
+
+.pulse-dot-amber {
+  background: var(--archon-warning);
+  box-shadow: 0 0 8px var(--archon-warning);
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--archon-border);
+  color: var(--archon-text-secondary);
+}
+
+.hud-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  background: rgba(8, 8, 12, 0.7);
+  border: 1px solid var(--archon-border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
